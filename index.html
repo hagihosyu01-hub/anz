@@ -1,0 +1,3754 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>工事安全管理システム</title>
+<style>
+:root {
+  --bg:#1a1f2e;--bg2:#242938;--bg3:#2e3447;--card:#2a3040;--border:#3a4255;
+  --accent:#f59e0b;--accent2:#10b981;--accent3:#3b82f6;--danger:#ef4444;
+  --text:#e8eaf0;--text2:#9ca3b0;--text3:#6b7280;--radius:10px;--shadow:0 2px 12px rgba(0,0,0,0.4);
+}
+/* ライトテーマ */
+body.light-theme {
+  --bg:#f5f0e8;--bg2:#ffffff;--bg3:#f0ebe0;--card:#ffffff;--border:#e0d8cc;
+  --accent:#e07b00;--accent2:#16a34a;--accent3:#2563eb;--danger:#dc2626;
+  --text:#1c1917;--text2:#57534e;--text3:#a8a29e;--radius:10px;--shadow:0 2px 12px rgba(0,0,0,0.08);
+}
+body.light-theme #header{background:#ffffff;border-bottom:1px solid #e0d8cc;}
+body.light-theme #tabs{background:#ffffff;}
+body.light-theme .tab-row-1{background:rgba(224,123,0,0.04);}
+body.light-theme .tab-row-2{background:rgba(37,99,235,0.04);}
+body.light-theme .card{background:#ffffff;box-shadow:0 1px 4px rgba(0,0,0,0.06);}
+body.light-theme .card-title{color:#1c1917;border-bottom:1px solid #f0ebe0;}
+body.light-theme input,body.light-theme select,body.light-theme textarea{background:#f5f0e8;border-color:#d0c8bc;color:#1c1917;}
+body.light-theme input:focus,body.light-theme select:focus,body.light-theme textarea:focus{border-color:var(--accent);background:#fff;}
+body.light-theme .tab-btn{color:#78716c;}
+body.light-theme .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);}
+body.light-theme .tab-row-label{color:#a8a29e;}
+body.light-theme .worker-chip{background:#f5f0e8;border-color:#d0c8bc;color:#1c1917;}
+body.light-theme .worker-chip.selected{background:rgba(22,163,74,0.08);border-color:var(--accent2);}
+body.light-theme .ai-area{background:#f0ebe0;border-color:#d0c8bc;}
+body.light-theme .ai-content{color:#1c1917;}
+body.light-theme .sign-canvas{background:#ffffff;border:1px solid #d0c8bc;}
+body.light-theme .btn-primary{background:var(--accent);color:#fff;}
+body.light-theme .btn-ghost{background:transparent;border-color:#d0c8bc;color:#57534e;}
+body.light-theme .btn-ghost:hover{background:#f0ebe0;}
+body.light-theme .btn-blue{background:#2563eb;color:#fff;}
+body.light-theme .btn-success{background:#16a34a;color:#fff;}
+body.light-theme .btn-danger{background:#dc2626;color:#fff;}
+body.light-theme .info-bar{background:#f0ebe0;border-color:#d0c8bc;}
+body.light-theme .info-item .ilabel{color:#78716c;}
+body.light-theme .info-item .ivalue{color:var(--accent);}
+body.light-theme .master-table th{background:#e8e0d4;color:#44403c;}
+body.light-theme .master-table td{border-color:#e0d8cc;}
+body.light-theme .master-table tr:nth-child(even) td{background:#faf8f5;}
+body.light-theme .chiku-hagi{background:rgba(22,163,74,0.15);color:#16a34a;border-color:rgba(22,163,74,0.3);}
+body.light-theme .chiku-yama{background:rgba(37,99,235,0.12);color:#2563eb;border-color:rgba(37,99,235,0.25);}
+body.light-theme .jk-chip.J{background:rgba(22,163,74,0.08);border-color:rgba(22,163,74,0.3);}
+body.light-theme .jk-chip.U{background:rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.3);}
+body.light-theme .sagyou-block{background:#faf8f5;border-color:#e0d8cc;}
+body.light-theme .kiken-check-wrap{background:#fef9f0;border-color:#fcd99a;}
+body.light-theme #save-status.ok{background:#dcfce7;color:#16a34a;border-color:#bbf7d0;}
+body.light-theme #save-status.err{background:#fee2e2;color:#dc2626;border-color:#fecaca;}
+
+/* テーマ切り替えボタン */
+#theme-toggle{background:none;border:1px solid var(--border);border-radius:20px;padding:4px 12px;cursor:pointer;font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px;transition:all 0.2s;}
+#theme-toggle:hover{background:var(--bg3);}
+
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Hiragino Sans','Meiryo',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;}
+#header{background:var(--bg2);border-bottom:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;gap:12px;position:sticky;top:0;z-index:100;}
+#header h1{font-size:15px;font-weight:600;color:var(--accent);}
+#header .subtitle{font-size:11px;color:var(--text2);}
+.api-wrap{margin-left:auto;display:flex;align-items:center;gap:6px;}
+.api-wrap label{font-size:11px;color:var(--text2);}
+.api-wrap input{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:5px 8px;font-size:12px;width:200px;}
+#tabs{background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:57px;z-index:99;}
+.tab-row{display:flex;align-items:center;overflow-x:auto;-webkit-overflow-scrolling:touch;}
+.tab-row-1{border-bottom:1px solid var(--border);background:rgba(245,158,11,0.04);}
+.tab-row-2{background:rgba(59,130,246,0.04);}
+.tab-row-label{font-size:10px;font-weight:600;color:var(--text3);padding:0 10px;white-space:nowrap;flex-shrink:0;}
+.tab-btn{padding:8px 14px;border:none;background:none;color:var(--text2);font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;font-family:inherit;}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(245,158,11,0.06);}
+.tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,0.04);}
+#main{padding:14px;max-width:920px;margin:0 auto;}
+.section{display:none;}.section.active{display:block;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:12px;box-shadow:var(--shadow);}
+.card-title{font-size:13px;font-weight:600;color:var(--accent);margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.card-title .ml{margin-left:auto;display:flex;gap:6px;flex-wrap:wrap;}
+.badge{font-size:10px;padding:2px 7px;border-radius:10px;font-weight:500;}
+.badge-green{background:rgba(16,185,129,0.15);color:var(--accent2);}
+.badge-blue{background:rgba(59,130,246,0.15);color:var(--accent3);}
+.form-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px;align-items:flex-end;}
+.fg{display:flex;flex-direction:column;gap:3px;flex:1;min-width:100px;}
+.fg.w2{flex:2;}.fg.w-half{flex:0 0 calc(50% - 4px);}.fg.w-third{flex:0 0 calc(33.3% - 6px);}
+.fg.w-quarter{flex:0 0 calc(25% - 6px);}.fg.w-full{flex:0 0 100%;}
+label{font-size:11px;color:var(--text2);font-weight:500;}
+input,select,textarea{background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:6px 9px;font-size:13px;width:100%;transition:border-color 0.2s;font-family:inherit;}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--accent);}
+input[readonly]{color:var(--text2);}
+select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M0 0l5 6 5-6z' fill='%236b7280'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 9px center;padding-right:26px;}
+textarea{resize:vertical;min-height:56px;}
+.btn{padding:6px 13px;border-radius:6px;border:none;cursor:pointer;font-size:12px;font-weight:600;transition:all 0.15s;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;font-family:inherit;}
+.btn-primary{background:var(--accent);color:#1a0f00;}.btn-primary:hover{background:#fbbf24;}
+.btn-success{background:var(--accent2);color:#001a0f;}.btn-success:hover{background:#34d399;}
+.btn-danger{background:var(--danger);color:#fff;}.btn-danger:hover{background:#f87171;}
+.btn-ghost{background:transparent;color:var(--text2);border:1px solid var(--border);}.btn-ghost:hover{background:var(--bg3);color:var(--text);}
+.btn-sm{padding:4px 9px;font-size:11px;}
+.sagyou-block{border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;background:var(--bg2);}
+.kotsu-block{border:1px dashed rgba(59,130,246,0.4);border-radius:6px;padding:10px;margin-top:10px;background:rgba(59,130,246,0.04);}
+.kotsu-title{font-size:11px;color:var(--accent3);font-weight:600;margin-bottom:8px;}
+.company-row{display:flex;gap:6px;align-items:flex-end;margin-bottom:6px;flex-wrap:wrap;}
+.company-row .fg{flex:2;min-width:0;}.company-row .fg.num{flex:0 0 75px;}
+.worker-chip{display:flex;align-items:center;gap:4px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:3px 7px;font-size:12px;cursor:pointer;transition:all 0.15s;user-select:none;}
+.worker-chip input[type=checkbox]{width:13px;height:13px;cursor:pointer;accent-color:var(--accent2);}
+.worker-chip.selected{border-color:var(--accent2);background:rgba(16,185,129,0.1);}
+.worker-chip input.hours-inp{width:50px;border:none;background:transparent;padding:0 3px;font-size:12px;color:var(--text);}
+.worker-chip input.hours-inp:focus{outline:none;}
+.worker-chip .role-sel{border:none;background:rgba(16,185,129,0.15);color:var(--accent2);font-size:11px;padding:1px 4px;border-radius:4px;font-weight:600;display:none;cursor:pointer;}
+.worker-chip.selected .role-sel{display:inline-block;}
+.worker-chip .role-sel:focus{outline:none;}
+.ai-area{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:6px;padding:9px;margin-top:7px;min-height:44px;}
+.ai-label{font-size:10px;color:var(--accent);margin-bottom:4px;font-weight:600;}
+.ai-content{font-size:12px;color:var(--text2);line-height:1.7;}
+.ai-loading{color:var(--accent);font-size:12px;animation:pulse 1s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.chiku-badge{display:inline-block;padding:3px 10px;border-radius:12px;font-size:13px;font-weight:700;letter-spacing:1px;}
+.chiku-hagi{background:rgba(16,185,129,0.2);color:#34d399;border:1px solid rgba(16,185,129,0.4);}
+.chiku-yama{background:rgba(59,130,246,0.2);color:#60a5fa;border:1px solid rgba(59,130,246,0.4);}
+.info-bar{display:flex;flex-wrap:wrap;gap:14px;padding:10px 0 2px;}
+.info-item .ilabel{font-size:10px;color:var(--text3);}
+.info-item .ivalue{font-size:16px;font-weight:700;color:var(--text);}
+.master-table{width:100%;border-collapse:collapse;}
+.master-table th{background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;padding:7px 9px;text-align:left;border-bottom:1px solid var(--border);}
+.master-table td{padding:7px 9px;border-bottom:1px solid rgba(58,66,85,0.5);font-size:12px;vertical-align:middle;}
+.master-table tr:hover td{background:rgba(255,255,255,0.02);}
+.master-input-row{display:flex;gap:7px;margin-bottom:10px;align-items:flex-end;flex-wrap:wrap;}
+
+/* 役職ラジオボタン */
+.role-radio-group{display:flex;flex-wrap:wrap;gap:4px;max-width:400px;}
+.role-radio-label{display:flex;align-items:center;gap:3px;padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--bg3);cursor:pointer;font-size:11px;transition:all 0.15s;white-space:nowrap;}
+.role-radio-label:hover{background:var(--bg2);}
+.role-radio-label input[type=radio]{width:12px;height:12px;accent-color:var(--accent2);}
+.role-radio-label.selected{border-color:var(--accent2);background:rgba(16,185,129,0.12);color:var(--accent2);font-weight:600;}
+.ukeoi-badge{display:inline-block;padding:1px 7px;border-radius:8px;font-size:10px;font-weight:600;}
+.ukeoi-motouke{background:rgba(59,130,246,0.15);color:#60a5fa;}
+.ukeoi-ichi{background:rgba(245,158,11,0.15);color:#fbbf24;}
+.ukeoi-ni{background:rgba(239,68,68,0.15);color:#f87171;}
+.ukeoi-kotsu{background:rgba(16,185,129,0.15);color:#34d399;}
+.ukeoi-kotsu2{background:rgba(16,185,129,0.08);color:#6ee7b7;}
+.fetch-loading{color:var(--accent);animation:pulse 1s infinite;font-size:12px;}
+
+/* 並び替えボタン */
+.sort-btns{display:flex;flex-direction:column;gap:2px;flex-shrink:0;}
+.sort-btn{background:var(--bg3);border:1px solid var(--border);border-radius:3px;color:var(--text2);font-size:10px;width:22px;height:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;padding:0;}
+.sort-btn:hover{background:var(--accent);color:#000;}
+.sort-btn:disabled{opacity:0.25;cursor:default;}
+
+/* 道路巡回カレンダー */
+.jk-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:8px;}
+.jk-cal-header{text-align:center;font-size:10px;color:var(--text3);padding:3px;font-weight:600;}
+.jk-cal-header.sun{color:#f87171;}.jk-cal-header.sat{color:#60a5fa;}
+.jk-cal-day{background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:4px;min-height:72px;position:relative;}
+.jk-cal-day.empty{background:transparent;border-color:transparent;}
+.jk-cal-day.today{border-color:var(--accent);background:rgba(245,158,11,0.08);}
+.jk-cal-date{font-size:10px;color:var(--text2);margin-bottom:3px;font-weight:600;}
+.jk-cal-date.sun{color:#f87171;}.jk-cal-date.sat{color:#60a5fa;}
+.jk-cal-sel{width:100%;font-size:10px;padding:1px 3px;background:var(--bg2);border:1px solid var(--border);border-radius:3px;color:var(--text);margin-bottom:2px;}
+.jk-cal-sel.J{border-color:var(--accent2);background:rgba(16,185,129,0.1);}
+.jk-cal-sel.U{border-color:var(--accent3);background:rgba(59,130,246,0.1);}
+.jk-chip{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:5px 10px;font-size:12px;user-select:none;white-space:nowrap;}
+.jk-chip.J{border-color:var(--accent2);background:rgba(16,185,129,0.1);}
+.jk-chip.U{border-color:var(--accent3);background:rgba(59,130,246,0.1);}
+.jk-chip input[type=checkbox]{width:13px;height:13px;cursor:pointer;flex-shrink:0;}
+.jk-chip.selected.J{background:rgba(16,185,129,0.2);}
+.jk-chip.selected.U{background:rgba(59,130,246,0.2);}
+.jk-chip .hours-inp{width:42px !important;border:none;background:transparent;padding:0 2px;font-size:12px;color:var(--text);flex-shrink:0;}
+.jk-chip .hours-inp:focus{outline:none;}
+.jk-role-badge{font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;}
+.jk-role-badge.J{background:rgba(16,185,129,0.3);color:#34d399;}
+.jk-role-badge.U{background:rgba(59,130,246,0.3);color:#60a5fa;}
+.rsc-row{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:9px;margin-bottom:7px;}
+
+/* WBGT レベルバッジ */
+.wbgt-almost{background:rgba(59,130,246,0.2);color:#60a5fa;border:1px solid rgba(59,130,246,0.4);}
+.wbgt-care{background:rgba(245,158,11,0.2);color:#fbbf24;border:1px solid rgba(245,158,11,0.4);}
+.wbgt-warn{background:rgba(249,115,22,0.2);color:#fb923c;border:1px solid rgba(249,115,22,0.4);}
+.wbgt-strict{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.4);}
+.wbgt-danger{background:rgba(220,38,38,0.9);color:#fff;border:1px solid #dc2626;}
+.wbgt-badge{padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:1px;}
+
+/* KYサインエリア */
+.ky-sign-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
+.ky-sign-name{font-size:12px;font-weight:600;color:var(--text);}
+
+/* 体調チェック */
+.taichou-chip{display:flex;align-items:center;gap:6px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;padding:6px 10px;font-size:12px;}
+.taichou-sel{border:none;background:transparent;font-size:12px;color:var(--text);font-weight:600;cursor:pointer;}
+.taichou-ok{border-color:var(--accent2);background:rgba(16,185,129,0.1);}
+.taichou-warn{border-color:var(--danger);background:rgba(239,68,68,0.1);}
+
+/* 体調チェックテーブル */
+.ky-table{width:100%;border-collapse:collapse;font-size:12px;}
+.ky-table th{background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;padding:6px 8px;text-align:center;border:1px solid var(--border);}
+.ky-table td{padding:5px 8px;border:1px solid var(--border);text-align:center;vertical-align:middle;}
+.ky-ok{background:rgba(16,185,129,0.15);color:var(--accent2);font-weight:600;}
+.ky-ng{background:rgba(239,68,68,0.15);color:var(--danger);font-weight:600;}
+.ky-none{background:rgba(239,68,68,0.08);color:var(--danger);font-size:10px;}
+
+/* ===== 手書きサイン ===== */
+.sign-block{margin-top:12px;border-top:1px solid var(--border);padding-top:10px;}
+.sign-block-title{font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;display:flex;align-items:center;gap:6px;}
+.sign-row{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px;}
+.sign-item{display:flex;flex-direction:column;gap:4px;align-items:center;}
+.sign-item .sign-label{font-size:10px;color:var(--text2);text-align:center;}
+.sign-item .sign-name{font-size:11px;color:var(--text3);text-align:center;min-height:14px;}
+.sign-canvas{background:#fff;border:1px solid var(--border);border-radius:5px;cursor:crosshair;touch-action:none;}
+.sign-canvas.signed{border-color:var(--accent2);}
+.sign-btns{display:flex;gap:4px;margin-top:3px;}
+
+/* 監督サインエリア */
+.kantoku-sign-area{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;}
+.kantoku-sign-title{font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px;}
+
+#save-status{position:fixed;bottom:18px;right:18px;padding:9px 16px;border-radius:8px;font-size:13px;font-weight:600;opacity:0;transition:opacity 0.3s;z-index:999;}
+#save-status.show{opacity:1;}
+#save-status.ok{background:var(--accent2);color:#001a0f;}
+#save-status.err{background:var(--danger);color:#fff;}
+.section-sub{font-size:11px;color:var(--text3);margin-bottom:6px;}
+
+/* トグルスイッチ */
+.toggle-track{width:36px;height:20px;background:var(--accent3);border-radius:10px;position:relative;cursor:pointer;transition:background 0.2s;flex-shrink:0;}
+.toggle-track.off{background:var(--border);}
+.toggle-thumb{width:14px;height:14px;background:#fff;border-radius:50%;position:absolute;top:3px;left:3px;transition:transform 0.2s;}
+.toggle-thumb.on{transform:translateX(16px);}
+.kotsu-block{transition:opacity 0.2s;}
+.kotsu-block.hidden{display:none;}
+
+/* 化学物質ブロック */
+.kagaku-block{margin-top:8px;border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px;background:rgba(239,68,68,0.04);}
+.kagaku-block.hidden{display:none;}
+.kagaku-title{font-size:11px;font-weight:600;color:var(--danger);margin-bottom:10px;}
+.risk-badge{display:inline-block;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700;}
+.risk-high{background:rgba(239,68,68,0.2);color:#f87171;border:1px solid rgba(239,68,68,0.4);}
+.risk-mid{background:rgba(245,158,11,0.2);color:#fbbf24;border:1px solid rgba(245,158,11,0.4);}
+.risk-low{background:rgba(16,185,129,0.2);color:#34d399;border:1px solid rgba(16,185,129,0.4);}
+.ppe-tag{display:inline-block;background:var(--bg3);border:1px solid var(--border);border-radius:4px;padding:2px 7px;font-size:11px;color:var(--text2);margin:2px;}
+
+/* 危険要因チェック */
+.kiken-check-wrap{margin-top:10px;border:1px solid rgba(245,158,11,0.3);border-radius:8px;padding:10px 12px;background:rgba(245,158,11,0.04);}
+.kiken-check-title{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px;}
+.kiken-check-row{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:4px;}
+.kiken-chk-label{display:flex;align-items:center;gap:5px;font-size:12px;font-weight:600;cursor:pointer;padding:4px 8px;border-radius:5px;border:1px solid var(--border);background:var(--bg3);transition:all 0.15s;user-select:none;}
+.kiken-chk-label:hover{background:var(--bg2);}
+.kiken-chk-label input[type=checkbox]{width:14px;height:14px;}
+.kiken-detail{margin-top:8px;border:1px solid var(--border);border-radius:6px;padding:10px;background:var(--bg2);}
+.kiken-detail.hidden{display:none;}
+.kiken-detail-title{font-size:11px;font-weight:600;color:var(--accent);margin-bottom:8px;}
+.kiken-ai-area{background:rgba(245,158,11,0.05);border:1px solid rgba(245,158,11,0.2);border-radius:5px;padding:8px;margin-top:7px;}
+.kiken-ai-label{font-size:10px;color:var(--accent);margin-bottom:3px;font-weight:600;}
+.kiken-ai-content{font-size:12px;color:var(--text2);line-height:1.7;}
+
+/* 安全巡視点検表 */
+.anzen-check-table{width:100%;border-collapse:collapse;}
+.anzen-check-table th{background:var(--bg3);color:var(--text2);font-size:11px;font-weight:600;padding:6px 8px;text-align:center;border:1px solid var(--border);}
+.anzen-check-table td{padding:5px 8px;border:1px solid var(--border);font-size:12px;vertical-align:middle;}
+.anzen-check-table .cat-cell{background:rgba(59,130,246,0.08);font-weight:600;color:var(--accent3);text-align:center;writing-mode:horizontal-tb;min-width:40px;}
+.anzen-chk{width:20px;height:20px;accent-color:var(--accent2);cursor:pointer;display:block;margin:0 auto;}
+.anzen-cat-group{margin-bottom:12px;}
+.anzen-cat-title{font-size:11px;font-weight:600;color:var(--accent3);background:rgba(59,130,246,0.08);padding:4px 10px;border-radius:4px;margin-bottom:4px;display:inline-block;}
+@media(max-width:600px){
+  .fg.w-third{flex:0 0 calc(50% - 4px);}
+  .fg.w-quarter{flex:0 0 calc(50% - 4px);}
+  .api-wrap input{width:140px;}
+}
+</style>
+</head>
+<body>
+
+<div id="header">
+  <div>
+    <h1>🦺 工事安全管理システム</h1>
+    <div class="subtitle">萩保守工事</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <button id="theme-toggle" onclick="toggleTheme()">🌙 ダーク</button>
+    <div class="api-wrap">
+      <label>Gemini APIキー</label>
+      <input type="password" id="api-key" placeholder="AIza..." oninput="localStorage.setItem('gemini_key',this.value)">
+    </div>
+  </div>
+</div>
+
+<div id="tabs">
+  <div class="tab-row tab-row-1">
+    <span class="tab-row-label">業務</span>
+    <button class="tab-btn active" onclick="showTab('uchiawase',this)">📋 安全作業打合せ簿</button>
+    <button class="tab-btn" onclick="showTab('ky',this)">🔰 KY活動</button>
+    <button class="tab-btn" onclick="showTab('settings',this)">⚙️ 設定</button>
+  </div>
+  <div class="tab-row tab-row-2">
+    <span class="tab-row-label">マスタ</span>
+    <button class="tab-btn" onclick="showTab('master-jimuin',this)">👷 人員</button>
+    <button class="tab-btn" onclick="showTab('master-kantoku',this)">👔 監督</button>
+    <button class="tab-btn" onclick="showTab('master-junkai',this)">🚗 道路巡回</button>
+    <button class="tab-btn" onclick="showTab('master-company',this)">🏢 会社</button>
+    <button class="tab-btn" onclick="showTab('master-koushu',this)">🔧 工種</button>
+    <button class="tab-btn" onclick="showTab('master-shiki',this)">📦 資機材</button>
+    <button class="tab-btn" onclick="showTab('master-kagaku',this)">⚗️ 化学物質</button>
+    <button class="tab-btn" onclick="showTab('master-anzen',this)">✅ 安全巡視点検</button>
+  </div>
+</div>
+
+<div id="main">
+
+<!-- ===== 安全作業打合せ簿 ===== -->
+<div id="sec-uchiawase" class="section active">
+
+  <div class="card">
+    <div class="card-title">
+      📅 基本情報
+      <div class="ml">
+        <button class="btn btn-ghost btn-sm" onclick="loadYesterday()">📥 前日引き継ぎ</button>
+        <button class="btn btn-blue btn-sm" onclick="exportPDF()">🖨️ PDF出力</button>
+        <button class="btn btn-primary btn-sm" onclick="saveUchiawase()">💾 保存</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg w2"><label>工事名</label><input type="text" id="kouji-name" value="萩保守工事"></div>
+      <div class="fg w-quarter"><label>日付</label><input type="date" id="kouji-date" onchange="updateChiku()"></div>
+      <div class="fg w-quarter"><label>天気</label>
+        <select id="tenki"><option>晴れ</option><option>曇り</option><option>雨</option><option>曇り時々晴れ</option><option>曇り時々雨</option><option>晴れ時々曇り</option></select>
+      </div>
+      <div class="fg w-quarter"><label>気温 (℃)</label><input type="number" id="kion" placeholder="25"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg w-full"><label>📢 連絡事項</label><textarea id="renraku" placeholder="本日の連絡事項を入力してください"></textarea></div>
+    </div>
+  </div>
+
+  <!-- 作業1（固定） -->
+  <div class="card">
+    <div class="card-title">🚗 作業1 <span class="badge badge-green">固定</span></div>
+    <div class="sagyou-block">
+      <div class="form-row">
+        <div class="fg w-third"><label>工種</label><input type="text" value="道路巡回工" readonly></div>
+        <div class="fg w-third"><label>種別</label><input type="text" value="道路巡回" readonly></div>
+        <div class="fg w-third"><label>作業内容</label><div id="s1-chiku" style="padding:5px 0;font-size:14px;font-weight:600"></div></div>
+      </div>
+      <div class="form-row">
+        <div class="fg w-half"><label>資機材</label>
+          <input type="text" id="s1-shiki" placeholder="資機材を入力" list="shiki-list" autocomplete="off">
+          <datalist id="shiki-list"></datalist>
+        </div>
+        <div class="fg w-half"><label>備考</label><input type="text" id="s1-biko" placeholder="備考"></div>
+      </div>
+      <div id="s1-companies"></div>
+      <!-- 作業1 固定会社名 -->
+      <div style="margin-top:6px;padding:6px 10px;background:var(--bg3);border:1px solid var(--border);border-radius:6px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:11px;color:var(--text2)">会社名（固定）</span>
+        <span id="s1-fixed-company" style="font-size:13px;font-weight:600;color:var(--text)">協和建設工業㈱</span>
+      </div>
+      <!-- 道路巡回メンバー（当日自動表示） -->
+      <div style="margin-top:8px;padding:8px 10px;background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:6px">
+        <div style="font-size:11px;color:var(--accent2);font-weight:600;margin-bottom:6px">🚗 本日の道路巡回メンバー（<span id="s1-junkai-company">協和建設工業㈱</span>）</div>
+        <div id="s1-junkai-members" style="display:flex;flex-wrap:wrap;gap:6px">
+          <p style="font-size:12px;color:var(--text3)">道路巡回マスタでスケジュールを登録してください</p>
+        </div>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="addCompanyRow('s1-companies','s1')" style="margin-top:6px">＋ 他社追加</button>
+      <button class="btn btn-ghost btn-sm" onclick="genAI('s1')" style="margin-top:6px">✨ AI安全指示</button>
+      <div class="ai-area"><div class="ai-label">AI安全指示事項</div><div class="ai-content" id="s1-ai">生成ボタンを押してください</div></div>
+      <!-- 手書き安全指示欄 -->
+      <div style="margin-top:8px">
+        <label style="font-size:11px;color:var(--text2);font-weight:500">✏️ 手書き安全指示欄</label>
+        <textarea id="s1-tegaki" placeholder="安全指示事項を手書き入力してください" style="margin-top:4px;min-height:64px"></textarea>
+      </div>
+      <!-- 職長サイン -->
+      <div class="sign-block">
+        <div class="sign-block-title">✍️ 職長サイン</div>
+        <div class="sign-row" id="s1-sign-row">
+          <div class="sign-item">
+            <div class="sign-label">職長</div>
+            <canvas class="sign-canvas" id="s1-sign" width="160" height="70"></canvas>
+            <div class="sign-btns">
+              <button class="btn btn-ghost btn-sm" onclick="clearCanvas('s1-sign')">消去</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 作業2〜 動的 -->
+  <div id="sagyou-dynamic"></div>
+  <button class="btn btn-success" onclick="addSagyou()" style="margin-bottom:14px">＋ 作業を追加</button>
+
+  <!-- 監理技術者・現場代理人 サイン -->
+  <div class="kantoku-sign-area">
+    <div class="kantoku-sign-title">👔 監理技術者・現場代理人 サイン</div>
+    <div class="sign-row" id="kantoku-sign-row">
+      <p style="font-size:12px;color:var(--text3)">人員マスタに監督を登録するとサイン欄が表示されます</p>
+    </div>
+  </div>
+
+  <!-- 安全巡視点検表 AM/PM -->
+  <div class="card">
+    <div class="card-title">✅ 安全巡視点検表
+      <span style="font-size:11px;color:var(--text2);font-weight:400;margin-left:4px">（レ点チェック、空欄＝該当なし）</span>
+    </div>
+    <div id="anzen-check-area">
+      <p style="font-size:12px;color:var(--text3)">安全巡視点検マスタに項目を登録してください</p>
+    </div>
+  </div>
+
+  <!-- 資材搬入 -->
+  <div class="card">
+    <div class="card-title">📦 資材搬入 <button class="btn btn-ghost btn-sm ml" onclick="addShizai()">＋ 追加</button></div>
+    <div id="shizai-list"></div>
+    <p class="section-sub" id="shizai-empty">搬入がある場合は追加してください</p>
+  </div>
+
+  <!-- 人員・労働時間 -->
+  <div class="card">
+    <div class="card-title">👷 人員・労働時間集計</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">自社・下請の人員は各作業ブロックの会社欄で入力してください。</p>
+    <div style="margin-bottom:12px">
+      <span style="font-size:12px;font-weight:600;color:var(--accent);display:block;margin-bottom:6px">監督</span>
+      <div id="kantoku-list"></div>
+    </div>
+    <div style="border-top:1px solid var(--border);padding-top:10px">
+      <div class="info-bar">
+        <div class="info-item"><div class="ilabel">本日就労人数</div><div class="ivalue" id="total-people">0 人</div></div>
+        <div class="info-item"><div class="ilabel">本日総労働時間</div><div class="ivalue" id="total-hours">0.0 h</div></div>
+        <div class="info-item"><div class="ilabel">当月累計労働時間</div><div class="ivalue" id="total-hours-cum">0.0 h</div></div>
+        <div class="info-item"><div class="ilabel">累計就労人数</div><div class="ivalue" id="total-people-cum">0 人</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== KY活動 ===== -->
+<div id="sec-ky" class="section">
+
+  <!-- 基本情報 -->
+  <div class="card">
+    <div class="card-title">
+      🔰 KY活動
+      <div class="ml">
+        <button class="btn btn-ghost btn-sm" onclick="syncKyFromUchiawase()">📥 打合せ簿から引き継ぎ</button>
+        <button class="btn btn-primary btn-sm" onclick="saveKy()">💾 保存</button>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg w-quarter"><label>日付</label><div id="ky-date" style="padding:6px 0;font-size:13px;font-weight:600;color:var(--text2)">—</div></div>
+      <div class="fg w-quarter"><label>天気</label><div id="ky-tenki" style="padding:6px 0;font-size:13px">—</div></div>
+      <div class="fg w-quarter"><label>気温</label><div id="ky-kion" style="padding:6px 0;font-size:13px">—</div></div>
+    </div>
+  </div>
+
+  <!-- WBGT -->
+  <div class="card">
+    <div class="card-title">🌡️ 暑さ指数（WBGT）
+      <button class="btn btn-blue btn-sm ml" onclick="fetchWBGT()">📡 環境省データ取得</button>
+    </div>
+    <div id="wbgt-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+    <div id="wbgt-display" style="display:none">
+      <!-- WBGT数値と警戒レベル -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <div style="display:flex;align-items:baseline;gap:6px">
+          <span style="font-size:13px;color:var(--text2)">WBGT 指数</span>
+          <span id="wbgt-value" style="font-size:36px;font-weight:700;color:var(--text)">—</span>
+        </div>
+        <div id="wbgt-level-badge"></div>
+      </div>
+      <!-- ゲージバー -->
+      <div style="margin-bottom:10px">
+        <div style="position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,#60a5fa 0%,#86efac 25%,#fbbf24 50%,#f97316 75%,#ef4444 100%);margin-bottom:4px">
+          <div id="wbgt-gauge-marker" style="position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #374151;transform:translateX(-50%);transition:left 0.5s;left:0%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+          <span>安全〜21</span>
+          <span>注意 21〜25</span>
+          <span>警戒 25〜28</span>
+          <span>危険 28〜</span>
+        </div>
+      </div>
+      <!-- 気温・湿度・天気チップ -->
+      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <span id="wbgt-kion-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">気温 —℃</span>
+        <span id="wbgt-shitsu-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">湿度 —%</span>
+        <span id="wbgt-tenki-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">天気 —</span>
+      </div>
+      <!-- 対策ガイダンス -->
+      <div id="wbgt-guidance"></div>
+    </div>
+  </div>
+
+  <!-- 作業ごとのKYブロック -->
+  <div id="ky-sagyou-blocks"></div>
+
+  <!-- 朝の体調チェック -->
+  <div class="card">
+    <div class="card-title">💊 朝の体調チェック</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">iPadで全員の体調を確認・入力してください</p>
+    <div id="ky-morning-check" style="display:flex;flex-wrap:wrap;gap:8px">
+      <p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p>
+    </div>
+  </div>
+
+  <!-- 時間帯別体調チェック確認 -->
+  <div class="card">
+    <div class="card-title">📱 時間帯別体調チェック（Google Form）
+      <button class="btn btn-ghost btn-sm ml" onclick="fetchKyCheck()">🔄 更新</button>
+    </div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:8px">作業員が各自スマホでQRコードから入力します。未入力は赤で表示されます。</p>
+    <div style="margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📲 Google Form URL</div>
+      <input type="text" id="ky-form-url" placeholder="https://forms.google.com/..." style="font-size:11px"
+        oninput="saveSetting('ky-form-url',this.value)">
+      <div id="ky-qr-wrap" style="margin-top:8px;display:none">
+        <canvas id="ky-qr-canvas" width="120" height="120"></canvas>
+        <p style="font-size:10px;color:var(--text3);margin-top:4px">このQRコードをPDFに印刷して現場に貼ってください</p>
+      </div>
+      <button class="btn btn-ghost btn-sm" onclick="showKyQR()" style="margin-top:6px">QRコード表示</button>
+    </div>
+    <div id="ky-check-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+    <div id="ky-check-table"></div>
+  </div>
+
+</div>
+
+<!-- ===== 人員マスタ ===== -->
+<div id="sec-master-jimuin" class="section">
+  <div class="card">
+    <div class="card-title">👷 人員マスタ
+      <div class="ml">
+        <button class="btn btn-success btn-sm" onclick="saveJimuinRoles()">💾 役職設定を保存</button>
+      </div>
+    </div>
+    <!-- コピペ取り込み -->
+    <div style="margin-bottom:12px">
+      <label style="font-size:12px;font-weight:600;color:var(--text);display:block;margin-bottom:6px">
+        📋 スプレッドシートから貼り付けで取り込む
+      </label>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:6px">
+        スプレッドシートでC列（会社名）・D列（請種類）・E列（氏名）を選択してコピーし、下の欄に貼り付けてください。
+      </p>
+      <textarea id="jimuin-paste-area" rows="6" placeholder="スプレッドシートからコピーしたデータをここに貼り付け&#10;例：&#10;協和建設工業㈱	元請け	山田太郎&#10;CGSコーポレーション	交通誘導	田中花子" style="font-size:12px;font-family:monospace;background:var(--bg3);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:8px;width:100%;resize:vertical"></textarea>
+      <div style="display:flex;gap:8px;margin-top:6px;align-items:center">
+        <button class="btn btn-blue btn-sm" onclick="parseAndImportJimuin()">📥 取り込む</button>
+        <button class="btn btn-ghost btn-sm" onclick="document.getElementById('jimuin-paste-area').value=''">クリア</button>
+        <span id="jimuin-import-status" style="font-size:12px"></span>
+      </div>
+    </div>
+    <!-- 手動追加 -->
+    <details style="margin-bottom:10px">
+      <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0">＋ 手動で追加する</summary>
+      <div class="master-input-row" style="margin-top:8px">
+        <div class="fg w2"><label>氏名</label><input type="text" id="j-name" placeholder="山田 太郎"></div>
+        <div class="fg"><label>会社名</label><select id="j-company"><option value="">選択</option></select></div>
+        <div class="fg"><label>請種類</label>
+          <select id="j-ukeoi">
+            <option value="motouke">自社（元請）</option>
+            <option value="ichi">1次下請</option>
+            <option value="ni">2次下請</option>
+          </select>
+        </div>
+        <div class="fg"><label>役職</label>
+          <select id="j-role">
+            <option value="worker">作業員</option>
+            <option value="shokucho">職長</option>
+            <option value="junkai">巡回員</option>
+            <option value="unten">運転手</option>
+            <option value="kotsu_in">交通誘導員</option>
+          </select>
+        </div>
+        <button class="btn btn-success" onclick="addJimuin()">追加</button>
+      </div>
+    </details>
+    <!-- 取得状態表示 -->
+    <div id="jimuin-fetch-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+    <!-- 一覧テーブル -->
+    <div style="overflow-x:auto">
+      <table class="master-table" id="jimuin-role-table">
+        <thead>
+          <tr>
+            <th style="width:44px">順序</th>
+            <th>氏名</th>
+            <th>会社名</th>
+            <th>種別</th>
+            <th style="min-width:300px">役職</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="jimuin-tbody"></tbody>
+      </table>
+      <p style="font-size:11px;color:var(--text3);margin-top:6px">▲▼ボタンで並び順を変更できます。次回以降も保持されます。</p>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 監督マスタ ===== -->
+<div id="sec-master-kantoku" class="section">
+  <div class="card">
+    <div class="card-title">👔 監督マスタ（現場代理人・監理技術者・安全巡視員）</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">固定メンバーを登録します。サイン欄・集計に自動反映されます。</p>
+    <div class="master-input-row">
+      <div class="fg w2"><label>氏名</label><input type="text" id="kt-name" placeholder="中村 敬"></div>
+      <div class="fg"><label>役職</label>
+        <select id="kt-role">
+          <option value="dairi">現場代理人</option>
+          <option value="kanri">監理技術者</option>
+          <option value="anzen">安全巡視員</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="addKantokuMaster()">追加</button>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>氏名</th><th>役職</th><th>操作</th></tr></thead>
+      <tbody id="kantoku-master-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 道路巡回マスタ ===== -->
+<div id="sec-master-junkai" class="section">
+  <!-- メンバー登録 -->
+  <div class="card">
+    <div class="card-title">🚗 道路巡回メンバー登録</div>
+    <div class="master-input-row">
+      <div class="fg w2"><label>氏名（人員マスタから選択）</label>
+        <select id="jk-name-sel">
+          <option value="">選択してください</option>
+        </select>
+      </div>
+      <div class="fg"><label>役職</label>
+        <select id="jk-role" onchange="refreshJunkaiNameSelect()">
+          <option value="J">J：道路巡回員</option>
+          <option value="U">U：道路巡回運行員</option>
+          <option value="worker">作業員（補欠）</option>
+          <option value="shokucho">職長（補欠）</option>
+        </select>
+      </div>
+      <div class="fg"><label>区分</label>
+        <select id="jk-type" onchange="refreshJunkaiNameSelect()">
+          <option value="regular">レギュラー</option>
+          <option value="backup">補欠</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="addJunkaiMember()">追加</button>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>氏名</th><th>役職</th><th>区分</th><th>操作</th></tr></thead>
+      <tbody id="junkai-member-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- 年間スケジュール -->
+  <div class="card">
+    <div class="card-title">📅 年間スケジュール
+      <div class="ml">
+        <button class="btn btn-ghost btn-sm" onclick="junkaiCalPrev()">◀</button>
+        <span id="junkai-cal-label" style="font-size:13px;font-weight:600;min-width:80px;text-align:center;display:inline-block"></span>
+        <button class="btn btn-ghost btn-sm" onclick="junkaiCalNext()">▶</button>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">各日付のJ（道路巡回員）とU（道路巡回運行員）を選択してください。打合せ簿の日付選択時に自動反映されます。</p>
+
+    <!-- パターン自動生成 -->
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:14px">
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:10px">⚡ パターン自動生成</div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:8px">2日ごとに3パターンが繰り返されます。メンバー登録後に設定してください。</p>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:10px" id="junkai-pattern-rows">
+        <!-- パターン行はJSで生成 -->
+      </div>
+      <div class="form-row" style="align-items:flex-end">
+        <div class="fg w-quarter">
+          <label>開始日</label>
+          <input type="date" id="jk-start-date" value="2026-04-01">
+        </div>
+        <div class="fg w-quarter">
+          <label>生成日数</label>
+          <input type="number" id="jk-gen-days" value="365" min="1" max="730">
+        </div>
+        <button class="btn btn-success" onclick="generateJunkaiSchedule()">🗓️ 自動生成</button>
+        <button class="btn btn-danger btn-sm" onclick="if(confirm('スケジュールを全て削除しますか？')){DB.junkaiSchedule={};saveDB();renderJunkaiCalendar();}">🗑️ リセット</button>
+      </div>
+    </div>
+
+    <div id="junkai-calendar"></div>
+  </div>
+</div>
+
+<!-- ===== 会社マスタ ===== -->
+<div id="sec-master-company" class="section">
+  <div class="card">
+    <div class="card-title">🏢 会社マスタ</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">人員マスタ取り込み時に自動登録されます。交通誘導会社は種別を「交通誘導」に変更してください→人員マスタに自動反映されます。</p>
+    <div class="master-input-row">
+      <div class="fg w2"><label>会社名</label><input type="text" id="c-name" placeholder="株式会社〇〇"></div>
+      <div class="fg"><label>種別</label>
+        <select id="c-type">
+          <option value="元請">元請</option>
+          <option value="一次下請">1次下請</option>
+          <option value="二次下請">2次下請</option>
+          <option value="kotsu">交通誘導</option>
+          <option value="kotsu2">交通誘導(2次)</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="addCompany()">追加</button>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>会社名</th><th>種別（クリックで変更）</th><th>操作</th></tr></thead>
+      <tbody id="company-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 工種マスタ ===== -->
+<div id="sec-master-koushu" class="section">
+  <div class="card">
+    <div class="card-title">🔧 工種マスタ</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">既存の値は候補として表示されます。新しい値はそのまま入力して追加できます。</p>
+    <div class="master-input-row">
+      <div class="fg">
+        <label>工種</label>
+        <input type="text" id="k-koushu" placeholder="土工事" list="koushu-list" oninput="refreshShubetsuList()" autocomplete="off">
+        <datalist id="koushu-list"></datalist>
+      </div>
+      <div class="fg">
+        <label>種別</label>
+        <input type="text" id="k-shubetsu" placeholder="掘削" list="shubetsu-list" oninput="refreshSagyouList()" autocomplete="off">
+        <datalist id="shubetsu-list"></datalist>
+      </div>
+      <div class="fg">
+        <label>作業内容</label>
+        <input type="text" id="k-sagyou" placeholder="人力掘削" list="sagyou-list" autocomplete="off">
+        <datalist id="sagyou-list"></datalist>
+      </div>
+      <button class="btn btn-success" onclick="addKoushu()">追加</button>
+    </div>
+    <!-- 絞り込みフィルタ -->
+    <div class="form-row" style="margin-bottom:8px">
+      <div class="fg w-third">
+        <label>絞り込み：工種</label>
+        <select id="filter-koushu" onchange="renderKoushuMaster()">
+          <option value="">すべて</option>
+        </select>
+      </div>
+      <div class="fg w-third">
+        <label>絞り込み：種別</label>
+        <select id="filter-shubetsu" onchange="renderKoushuMaster()">
+          <option value="">すべて</option>
+        </select>
+      </div>
+      <div class="fg w-third" style="justify-content:flex-end;padding-top:18px">
+        <button class="btn btn-ghost btn-sm" onclick="clearKoushuFilter()">フィルタ解除</button>
+      </div>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>工種</th><th>種別</th><th>作業内容</th><th>操作</th></tr></thead>
+      <tbody id="koushu-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 資機材マスタ ===== -->
+<div id="sec-master-shiki" class="section">
+  <div class="card">
+    <div class="card-title">📦 資機材マスタ</div>
+    <div class="master-input-row">
+      <div class="fg w2"><label>資機材名</label><input type="text" id="sk-name" placeholder="バックホウ"></div>
+      <button class="btn btn-success" onclick="addShikiMaster()">追加</button>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>資機材名</th><th>操作</th></tr></thead>
+      <tbody id="shiki-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ===== 化学物質マスタ ===== -->
+<div id="sec-master-kagaku" class="section">
+  <div class="card">
+    <div class="card-title">⚗️ 化学物質マスタ</div>
+    <div class="master-input-row">
+      <div class="fg w2"><label>化学物質名</label><input type="text" id="kg-name" placeholder="〇〇塗料・△△防錆剤"></div>
+      <div class="fg"><label>リスクレベル</label>
+        <select id="kg-risk">
+          <option value="high">高</option>
+          <option value="mid" selected>中</option>
+          <option value="low">低</option>
+        </select>
+      </div>
+      <button class="btn btn-success" onclick="addKagaku()">追加</button>
+    </div>
+    <div class="form-row">
+      <div class="fg w-half"><label>危険有害性（複数選択可）</label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px" id="kg-hazard-checks">
+          <label class="worker-chip"><input type="checkbox" value="引火性"><span>引火性</span></label>
+          <label class="worker-chip"><input type="checkbox" value="爆発性"><span>爆発性</span></label>
+          <label class="worker-chip"><input type="checkbox" value="酸化性"><span>酸化性</span></label>
+          <label class="worker-chip"><input type="checkbox" value="急性毒性"><span>急性毒性</span></label>
+          <label class="worker-chip"><input type="checkbox" value="皮膚刺激"><span>皮膚刺激</span></label>
+          <label class="worker-chip"><input type="checkbox" value="吸入有害"><span>吸入有害</span></label>
+          <label class="worker-chip"><input type="checkbox" value="環境有害"><span>環境有害</span></label>
+        </div>
+      </div>
+      <div class="fg w-half"><label>必要PPE（複数選択可）</label>
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:4px" id="kg-ppe-checks">
+          <label class="worker-chip"><input type="checkbox" value="保護手袋"><span>保護手袋</span></label>
+          <label class="worker-chip"><input type="checkbox" value="防毒マスク"><span>防毒マスク</span></label>
+          <label class="worker-chip"><input type="checkbox" value="防塵マスク"><span>防塵マスク</span></label>
+          <label class="worker-chip"><input type="checkbox" value="保護眼鏡"><span>保護眼鏡</span></label>
+          <label class="worker-chip"><input type="checkbox" value="防護服"><span>防護服</span></label>
+          <label class="worker-chip"><input type="checkbox" value="安全靴"><span>安全靴</span></label>
+        </div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg w-full"><label>取扱い注意事項</label><textarea id="kg-note" placeholder="保管方法・廃棄方法・緊急時対応など" style="min-height:56px"></textarea></div>
+    </div>
+    <table class="master-table" style="margin-top:10px">
+      <thead><tr><th>化学物質名</th><th>リスク</th><th>危険有害性</th><th>必要PPE</th><th>注意事項</th><th>操作</th></tr></thead>
+      <tbody id="kagaku-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+ -->
+<div id="sec-settings" class="section">
+  <div class="card">
+    <div class="card-title">⚙️ GAS連携設定</div>
+    <div class="fg" style="margin-bottom:10px"><label>Google Apps Script WebアプリURL</label><input type="text" id="gas-url" placeholder="https://script.google.com/macros/s/..." oninput="saveSetting('gas-url',this.value)"></div>
+    <!-- マスタ同期 -->
+    <div style="background:rgba(16,185,129,0.05);border:1px solid rgba(16,185,129,0.2);border-radius:8px;padding:12px;margin-bottom:12px">
+      <div style="font-size:12px;font-weight:600;color:var(--accent2);margin-bottom:6px">📡 マスタ共有（複数端末対応）</div>
+      <p style="font-size:11px;color:var(--text2);margin-bottom:8px;line-height:1.6">
+        マスタデータはGASのスプレッドシートに自動保存されます。<br>
+        別の端末で開くときは「GASからマスタ取得」を押してください。
+      </p>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <button class="btn btn-success btn-sm" onclick="loadMasterFromGAS().then(ok=>{if(ok){renderAllMasters();showStatus('マスタを取得しました ✓','ok');}})">📥 GASからマスタ取得</button>
+        <button class="btn btn-blue btn-sm" onclick="syncMasterToGAS(getSetting('gas-url')).then(()=>showStatus('マスタを保存しました ✓','ok'))">📤 GASへマスタ保存</button>
+      </div>
+      <div id="master-sync-status" style="font-size:11px;color:var(--text2);margin-top:6px"></div>
+    </div>
+    <div class="fg" style="margin-bottom:10px"><label>工事開始日</label><input type="date" id="kouji-start" value="2026-04-01" oninput="saveSetting('kouji-start',this.value)"></div>
+    <div class="fg" style="margin-bottom:10px"><label>道路巡回 会社名（固定）</label><input type="text" id="junkai-company" placeholder="協和建設工業㈱" oninput="saveSetting('junkai-company',this.value);updateJunkaiCompanyDisplay()"></div>
+    <p style="font-size:12px;color:var(--text2);line-height:1.7">GAS URLを設定すると保存時にスプレッドシートへ自動送信されます。</p>
+    <div style="margin-top:12px"><button class="btn btn-danger btn-sm" onclick="if(confirm('全データをリセットしますか？'))clearAll()">🗑️ 全データリセット</button></div>
+  </div>
+  <div class="card">
+    <div class="card-title">📊 累計データ補正設定</div>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:10px">当月累計労働時間（4月〜翌3月）は保存した履歴から自動計算されます。年度初めの繰越時間がある場合のみ下記に入力してください。</p>
+    <div class="form-row">
+      <div class="fg w-half"><label>累計就労人数（補正値）</label><input type="number" id="cum-people" placeholder="0" oninput="saveSetting('cum-people',this.value);calcTotals()"></div>
+      <div class="fg w-half"><label>当月累計労働時間（繰越・補正値）</label><input type="number" id="cum-hours-manual" placeholder="0" step="0.5" oninput="saveSetting('cum-hours-manual',this.value);calcTotals()"></div>
+    </div>
+    <div style="margin-top:10px;padding:8px 10px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--text2)">
+      💡 今年度の履歴データ件数：<strong id="month-history-count">0</strong> 件　年度累計時間（履歴分）：<strong id="month-history-hours">0.0</strong> h
+    </div>
+  </div>
+
+  <!-- AI安全指示カスタマイズ -->
+  <div class="card">
+    <div class="card-title">🤖 AI安全指示 カスタマイズ</div>
+    <p style="font-size:11px;color:var(--text2);margin-bottom:12px">「✨ AI安全指示」ボタンを押したときの生成条件をカスタマイズできます。</p>
+    <div class="form-row">
+      <div class="fg w-quarter">
+        <label>出力項目数</label>
+        <select id="ai-item-count" onchange="saveSetting('ai-item-count',this.value)">
+          <option value="3">3項目</option>
+          <option value="5" selected>5項目</option>
+          <option value="7">7項目</option>
+          <option value="10">10項目</option>
+        </select>
+      </div>
+      <div class="fg w-quarter">
+        <label>出力スタイル</label>
+        <select id="ai-style" onchange="saveSetting('ai-style',this.value)">
+          <option value="simple">簡潔（1行）</option>
+          <option value="normal" selected>標準</option>
+          <option value="detail">詳しく</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="fg">
+        <label>追加条件・重点テーマ（自由記入）</label>
+        <textarea id="ai-extra-prompt" rows="3"
+          placeholder="例：熱中症対策を必ず含める&#10;例：初心者作業員がいるため基本動作を重視&#10;例：雨天時の滑り対策を重点的に"
+          oninput="saveSetting('ai-extra-prompt',this.value)"
+          style="min-height:70px"></textarea>
+      </div>
+    </div>
+    <div style="padding:8px 10px;background:var(--bg3);border-radius:6px;font-size:11px;color:var(--text2)">
+      💡 プレビュー：<span id="ai-prompt-preview">5項目・標準スタイルで生成します</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 安全巡視点検マスタ ===== -->
+<div id="sec-master-anzen" class="section">
+  <div class="card">
+    <div class="card-title">✅ 安全巡視点検マスタ</div>
+    <div class="master-input-row">
+      <div class="fg"><label>カテゴリ</label>
+        <input type="text" id="az-cat" placeholder="般・玉掛・重機・足場など" list="az-cat-list">
+        <datalist id="az-cat-list"></datalist>
+      </div>
+      <div class="fg w2"><label>点検項目</label>
+        <input type="text" id="az-item" placeholder="現場内の整理、整頓、清掃">
+      </div>
+      <div class="fg" style="max-width:80px"><label>順序</label>
+        <input type="number" id="az-order" placeholder="1" min="1">
+      </div>
+      <button class="btn btn-success" onclick="addAnzenItem()">追加</button>
+    </div>
+    <div style="margin-bottom:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-blue btn-sm" onclick="loadDefaultAnzen()">📋 初期データを読み込む</button>
+      <span style="font-size:11px;color:var(--text3);align-self:center">標準の点検表項目をそのまま登録します</span>
+    </div>
+    <table class="master-table">
+      <thead><tr><th>カテゴリ</th><th>点検項目</th><th>順序</th><th>操作</th></tr></thead>
+      <tbody id="anzen-tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+</div>
+<div id="save-status"></div>
+
+<script>
+let DB={jimuin:[],kantokuMaster:[],junkaiMaster:[],junkaiSchedule:{},companies:[],koushu:[],shiki:[],kagaku:[],anzenItems:[],settings:{},history:[]};
+const ROLE_MAP={worker:'作業員',shokucho:'職長',dairi:'現場代理人',kanri:'監理技術者',anzen:'安全巡視員',junkai:'巡回員',unten:'運転手',kotsu_in:'交通誘導員'};
+const UKEOI_MAP={motouke:'自社',ichi:'1次下請',ni:'2次下請',kotsu:'交通誘導',kotsu2:'交通誘導(2次)'};
+
+const ROLE_OPTIONS={
+  motouke:[
+    {value:'worker',label:'作業員'},{value:'shokucho',label:'職長'},
+    {value:'junkai',label:'巡回員'},{value:'unten',label:'運転手'},
+  ],
+  ichi:[{value:'worker',label:'作業員'},{value:'shokucho',label:'職長'}],
+  ni:[{value:'worker',label:'作業員'},{value:'shokucho',label:'職長'}],
+  kotsu:[{value:'kotsu_in',label:'交通誘導員'}],
+  kotsu2:[{value:'kotsu_in',label:'交通誘導員'}],
+};
+
+// 請種類バッジ
+function ukeoiBadge(ukeoi){
+  const cls={motouke:'ukeoi-motouke',ichi:'ukeoi-ichi',ni:'ukeoi-ni',kotsu:'ukeoi-kotsu',kotsu2:'ukeoi-kotsu2'};
+  return `<span class="ukeoi-badge ${cls[ukeoi]||'ukeoi-motouke'}">${UKEOI_MAP[ukeoi]||ukeoi}</span>`;
+}
+
+// 会社マスタ種別から交通誘導かどうか判定
+function isKotsuCompany(companyName){
+  const c=DB.companies.find(x=>x.name===companyName);
+  return c&&(c.type==='kotsu'||c.type==='kotsu2');
+}
+
+// 交通誘導フラグ（会社マスタベース）
+function getEffectiveUkeoi(jimuin){
+  if(isKotsuCompany(jimuin.company)){
+    // 会社マスタが交通誘導 → 請種類で1次/2次判定
+    return jimuin.ukeoi==='ni'?'kotsu2':'kotsu';
+  }
+  return jimuin.ukeoi||'motouke';
+}
+
+// ラジオボタンHTML生成
+function buildRoleRadios(jimuin){
+  // 監督マスタで登録されている場合は役職を固定表示
+  const kantokuEntry=DB.kantokuMaster.find(k=>k.name===jimuin.name);
+  if(kantokuEntry){
+    const roleLabel=ROLE_MAP[kantokuEntry.role]||kantokuEntry.role;
+    return `<span class="role-radio-label selected" style="border-color:var(--accent);background:rgba(245,158,11,0.12);color:var(--accent)">${roleLabel}（監督マスタ）</span>`;
+  }
+  // 巡回マスタでレギュラー登録されている場合は役職を固定表示
+  const junkaiEntries=DB.junkaiMaster.filter(m=>m.name===jimuin.name&&m.type==='regular');
+  if(junkaiEntries.length>0){
+    const labels=junkaiEntries.map(m=>JUNKAI_ROLE_MAP[m.role]||m.role).join('・');
+    return `<span class="role-radio-label selected" style="border-color:var(--accent2);background:rgba(16,185,129,0.12);color:var(--accent2)">${labels}（巡回マスタ）</span>`;
+  }
+  // 通常：請種類に応じたラジオボタン
+  const eff=getEffectiveUkeoi(jimuin);
+  const isKotsu=eff==='kotsu'||eff==='kotsu2';
+  if(isKotsu){
+    return `<span class="role-radio-label selected" style="border-color:var(--accent3);background:rgba(59,130,246,0.12);color:var(--accent3)">交通誘導員（固定）</span>`;
+  }
+  const opts=getRoleOptions(eff);
+  return `<div class="role-radio-group">${opts.map(o=>{
+    const checked=jimuin.role===o.value;
+    return `<label class="role-radio-label${checked?' selected':''}" onclick="onRoleChange(this)">
+      <input type="radio" name="role-${jimuin.id}" value="${o.value}"${checked?' checked':''}
+        onchange="updateRoleSelect(${jimuin.id},this.value)">
+      ${o.label}
+    </label>`;
+  }).join('')}</div>`;
+}
+
+function onRoleChange(labelEl){
+  // 同グループの選択状態を更新
+  const group=labelEl.closest('.role-radio-group');
+  if(!group)return;
+  group.querySelectorAll('.role-radio-label').forEach(l=>l.classList.remove('selected'));
+  labelEl.classList.add('selected');
+}
+
+function updateRoleSelect(jimuinId, roleValue){
+  const j=DB.jimuin.find(x=>x.id===jimuinId);
+  if(j) j.role=roleValue;
+}
+
+// ===== コピペ取り込み =====
+function parseAndImportJimuin(){
+  const text=document.getElementById('jimuin-paste-area').value.trim();
+  if(!text){ setImportStatus('貼り付けデータがありません','err'); return; }
+
+  const lines=text.split('\n').filter(l=>l.trim());
+  const imported=[], skipped=[], errors=[];
+
+  lines.forEach((line,i)=>{
+    // タブ区切りまたは複数スペースで分割
+    const cols=line.split(/\t/).map(c=>c.trim());
+    if(cols.length<2){ errors.push(`${i+1}行目: 列数不足`); return; }
+
+    // 列の順序を自動判定（C・D・E = 会社名・請種類・氏名）
+    // 3列: [会社名, 請種類, 氏名]
+    // 2列: [請種類, 氏名] または [会社名, 氏名]
+    let company='', ukeoi_raw='', name_raw='';
+    if(cols.length>=3){
+      company=cols[0]; ukeoi_raw=cols[1]; name_raw=cols[2];
+    } else {
+      // 2列の場合は請種類+氏名と判断
+      ukeoi_raw=cols[0]; name_raw=cols[1];
+    }
+
+    // 氏名正規化（スペース除去）
+    const name=name_raw.replace(/[\s\u3000]/g,'').trim();
+    if(!name){ skipped.push(`${i+1}行目: 氏名なし`); return; }
+
+    // 会社名正規化
+    let co=company.trim();
+    co=co.replace(/^株式会社[\s\u3000]*/,'㈱').replace(/[\s\u3000]*株式会社$/,'㈱');
+    co=co.replace(/^（株）[\s\u3000]*/,'㈱').replace(/[\s\u3000]*（株）$/,'㈱');
+    co=co.replace(/^\(株\)[\s\u3000]*/,'㈱').replace(/[\s\u3000]*\(株\)$/,'㈱');
+
+    // 請種類：D列の値をそのまま保持（変換しない）
+    // 交通誘導は会社マスタで判定するためここでは変換しない
+    const ukeoi=ukeoi_raw.trim()||'元請';
+
+    // 重複チェック（同名は上書き）
+    const existing=DB.jimuin.find(j=>j.name===name);
+    if(existing){
+      existing.company=co; existing.ukeoi=ukeoi; existing.fromGAS=true;
+      skipped.push(`${name}（更新）`);
+    } else {
+      DB.jimuin.push({id:Date.now()+i,name,company:co,ukeoi,role:'worker',fromGAS:true});
+      imported.push(name);
+    }
+
+    // 会社マスタへ自動登録（種別はそのまま・変換しない）
+    autoAddCompanyRaw(co, ukeoi_raw);
+  });
+
+  saveDB();
+  renderJimuinMaster();renderJimuinSelects();refreshShokuchoSelects();renderKantokuSignArea();
+  renderCompanyMaster();refreshAllCompanySelects();refreshJCompanySelect();
+
+  const msg=`✅ 新規${imported.length}名取り込み、${skipped.length}件更新${errors.length?` ⚠️エラー${errors.length}件`:''}`;
+  setImportStatus(msg,'ok');
+  if(imported.length||skipped.length) document.getElementById('jimuin-paste-area').value='';
+}
+
+function setImportStatus(msg,type){
+  const el=document.getElementById('jimuin-import-status');if(!el)return;
+  el.textContent=msg;
+  el.style.color=type==='err'?'var(--danger)':type==='ok'?'var(--accent2)':'var(--text2)';
+}
+
+// fetchJimuinFromGAS（不使用だが残す）
+async function fetchJimuinFromGAS(){ setImportStatus('コピペ方式をご利用ください','err'); }
+function setFetchStatus(msg,type){ setImportStatus(msg,type); }
+
+// 役職設定を保存
+function saveJimuinRoles(){
+  // ラジオボタンの現在値をDBに反映
+  DB.jimuin.forEach(j=>{
+    const radio=document.querySelector(`input[name="role-${j.id}"]:checked`);
+    if(radio) j.role=radio.value;
+  });
+  saveDB();
+  renderJimuinSelects();refreshShokuchoSelects();renderKantokuSignArea();
+  showStatus('役職設定を保存しました ✓','ok');
+}
+
+const DEFAULT_ANZEN=[
+  {cat:'般',item:'現場内の整理、整頓、清掃',order:1},
+  {cat:'般',item:'作業行動及び作業服装、保護具',order:2},
+  {cat:'般',item:'有資格者の配置',order:3},
+  {cat:'般',item:'使用資機材の始業前点検',order:4},
+  {cat:'般',item:'一般車（者）通路の確保',order:5},
+  {cat:'般',item:'危険箇所等の保安設置',order:6},
+  {cat:'般',item:'運転速度、積荷及び駐車状況',order:7},
+  {cat:'般',item:'警戒、規制看板の配置状況',order:8},
+  {cat:'般',item:'誘導員の位置及び誘導方法',order:9},
+  {cat:'般',item:'現場、既設構造物破損、環境汚染',order:10},
+  {cat:'玉掛',item:'ワイヤー等玉掛用具の点検',order:1},
+  {cat:'玉掛',item:'合図方法の周知、上下作業の禁止',order:2},
+  {cat:'重機',item:'免許の確認、運転責任者標示',order:1},
+  {cat:'重機',item:'始業前点検の記録',order:2},
+  {cat:'重機',item:'重機類の通路、作業床の確保',order:3},
+  {cat:'重機',item:'重機類作業範囲内の立入禁止措置',order:4},
+  {cat:'足場',item:'組立て、構造、材料の安全度',order:1},
+  {cat:'足場',item:'危険箇所の安全設備と標示',order:2},
+  {cat:'足場',item:'積載荷重の標示',order:3},
+  {cat:'足場',item:'墜落制止用器具の使用状況',order:4},
+  {cat:'足場',item:'開口部等の墜落防止設備',order:5},
+  {cat:'足場',item:'はしご、脚立の滑り止め、転倒防止',order:6},
+  {cat:'斜面',item:'安全勾配、地山崩壊の危険防止',order:1},
+  {cat:'斜面',item:'落盤、落石の防護設備',order:2},
+  {cat:'斜面',item:'雨水、地下水、湧水の処置',order:3},
+  {cat:'占用',item:'占用物件事前調査の実施状況',order:1},
+  {cat:'占用',item:'占用物件の位置の周知と明示',order:2},
+  {cat:'占用',item:'近接作業時の見張り員の配置',order:3},
+  {cat:'盗難',item:'不審者、不審物の確認',order:1},
+  {cat:'盗難',item:'資機材の保管、鍵の管理状況',order:2},
+];
+
+function loadDB(){
+  try{
+    const s=localStorage.getItem('anzen_db3');
+    if(s) DB=JSON.parse(s);
+    if(!DB.kagaku) DB.kagaku=[];
+    if(!DB.anzenItems) DB.anzenItems=[];
+    if(!DB.kantokuMaster) DB.kantokuMaster=[];
+    if(!DB.junkaiMaster) DB.junkaiMaster=[];
+    if(!DB.junkaiSchedule) DB.junkaiSchedule={};
+    // 既存データのマイグレーション
+    const typeMap={jisha:'元請',motouke:'元請',shita:'一次下請',shita1:'一次下請',shita2:'二次下請',ichi:'一次下請',ni:'二次下請'};
+    DB.companies.forEach(c=>{if(typeMap[c.type]) c.type=typeMap[c.type];});
+    DB.jimuin.forEach(j=>{if(typeMap[j.ukeoi]) j.ukeoi=typeMap[j.ukeoi];});
+  }catch(e){}
+}
+
+// ===== 道路巡回マスタ =====
+const JUNKAI_ROLE_MAP={J:'道路巡回員',U:'道路巡回運行員',worker:'作業員',shokucho:'職長'};
+const JUNKAI_TYPE_MAP={regular:'レギュラー',backup:'補欠'};
+let junkaiCalYear=new Date().getFullYear();
+let junkaiCalMonth=new Date().getMonth();
+
+// 氏名セレクトを人員マスタから更新
+function refreshJunkaiNameSelect(){
+  const sel=document.getElementById('jk-name-sel');if(!sel)return;
+  const role=document.getElementById('jk-role')?.value||'J';
+  const type=document.getElementById('jk-type')?.value||'regular';
+  // 同じ名前＋役職＋区分の組み合わせのみ除外（異なる役職での登録は可能）
+  const registered=DB.junkaiMaster.filter(j=>j.role===role&&j.type===type).map(j=>j.name);
+  const members=DB.jimuin.filter(j=>{
+    const eff=getEffectiveUkeoi(j);
+    return eff!=='kotsu'&&eff!=='kotsu2'&&!['dairi','kanri','anzen'].includes(j.role)
+      &&!registered.includes(j.name);
+  });
+  if(members.length===0){
+    sel.innerHTML='<option value="">（この役職・区分での未登録メンバーがいません）</option>';
+  } else {
+    sel.innerHTML='<option value="">選択してください</option>'+
+      members.map(j=>`<option value="${j.name}">${j.name}（${ROLE_MAP[j.role]||j.role}）</option>`).join('');
+  }
+}
+
+function addJunkaiMember(){
+  const name=document.getElementById('jk-name-sel').value;
+  const role=document.getElementById('jk-role').value;
+  const type=document.getElementById('jk-type').value;
+  if(!name){showStatus('氏名を選択してください','err');return;}
+  if(DB.junkaiMaster.some(j=>j.name===name&&j.role===role&&j.type===type)){
+    showStatus(`${name}（${JUNKAI_ROLE_MAP[role]}・${JUNKAI_TYPE_MAP[type]}）はすでに登録されています`,'err');return;
+  }
+  DB.junkaiMaster.push({id:Date.now(),name,role,type});
+  saveDB();
+  document.getElementById('jk-name-sel').value='';
+  renderJunkaiMemberTable();
+}
+function deleteJunkaiMember(id){
+  DB.junkaiMaster=DB.junkaiMaster.filter(j=>j.id!==id);
+  saveDB();renderJunkaiMemberTable();
+}
+function renderJunkaiMemberTable(){
+  const tbody=document.getElementById('junkai-member-tbody');
+  if(tbody){
+    tbody.innerHTML=DB.junkaiMaster.map(j=>`
+      <tr>
+        <td style="font-weight:500">${j.name}</td>
+        <td><span class="jk-role-badge ${j.role==='J'||j.role==='U'?j.role:''}" style="${j.role==='worker'||j.role==='shokucho'?'background:rgba(245,158,11,0.2);color:#fbbf24;padding:1px 5px;border-radius:8px;font-size:11px;font-weight:700':''}">
+          ${JUNKAI_ROLE_MAP[j.role]||j.role}</span></td>
+        <td><span style="font-size:11px;color:${j.type==='regular'?'var(--accent2)':'var(--text3)'}">
+          ${JUNKAI_TYPE_MAP[j.type]||j.type}</span></td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteJunkaiMember(${j.id})">削除</button></td>
+      </tr>`).join('');
+  }
+  renderJunkaiCalendar();
+  renderJunkaiPatternRows();
+  refreshJunkaiNameSelect();
+}
+
+// ===== カレンダー =====
+function junkaiCalPrev(){junkaiCalMonth--;if(junkaiCalMonth<0){junkaiCalMonth=11;junkaiCalYear--;}renderJunkaiCalendar();}
+function junkaiCalNext(){junkaiCalMonth++;if(junkaiCalMonth>11){junkaiCalMonth=0;junkaiCalYear++;}renderJunkaiCalendar();}
+function getJunkaiKey(y,m,d){return`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;}
+
+function renderJunkaiCalendar(){
+  const label=document.getElementById('junkai-cal-label');
+  if(label) label.textContent=`${junkaiCalYear}年${junkaiCalMonth+1}月`;
+  const cal=document.getElementById('junkai-calendar');if(!cal)return;
+  const today=new Date();
+  const firstDay=new Date(junkaiCalYear,junkaiCalMonth,1).getDay();
+  const daysInMonth=new Date(junkaiCalYear,junkaiCalMonth+1,0).getDate();
+  const jMembers=DB.junkaiMaster.filter(m=>m.role==='J'||(m.type==='backup'));
+  const uMembers=DB.junkaiMaster.filter(m=>m.role==='U'||(m.type==='backup'));
+  const mkOpts=(members,sval)=>'<option value="">—</option>'+members.map(m=>`<option value="${m.id}"${m.id==sval?' selected':''}>${m.name}</option>`).join('');
+  let html='<div class="jk-cal-grid">';
+  ['日','月','火','水','木','金','土'].forEach((d,i)=>html+=`<div class="jk-cal-header ${i===0?'sun':i===6?'sat':''}">${d}</div>`);
+  for(let i=0;i<firstDay;i++) html+='<div class="jk-cal-day empty"></div>';
+  for(let d=1;d<=daysInMonth;d++){
+    const key=getJunkaiKey(junkaiCalYear,junkaiCalMonth,d);
+    const sc=DB.junkaiSchedule[key]||{J:'',U:''};
+    const dow=new Date(junkaiCalYear,junkaiCalMonth,d).getDay();
+    const isToday=today.getFullYear()===junkaiCalYear&&today.getMonth()===junkaiCalMonth&&today.getDate()===d;
+    // 地区バッジ
+    const chiku=getChiku(key);
+    const isR191=chiku==='R191号';
+    const chikuBadge=`<span style="font-size:8px;font-weight:700;padding:1px 4px;border-radius:3px;${isR191?'background:rgba(16,185,129,0.2);color:#34d399;':'background:rgba(59,130,246,0.2);color:#60a5fa;'}">${chiku}</span>`;
+    html+=`<div class="jk-cal-day${isToday?' today':''}">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px">
+        <div class="jk-cal-date ${dow===0?'sun':dow===6?'sat':''}">${d}</div>
+        ${chikuBadge}
+      </div>
+      <select class="jk-cal-sel J" onchange="saveJunkaiSched('${key}','J',this.value)">${mkOpts(jMembers,sc.J)}</select>
+      <select class="jk-cal-sel U" onchange="saveJunkaiSched('${key}','U',this.value)">${mkOpts(uMembers,sc.U)}</select>
+    </div>`;
+  }
+  html+='</div>';
+  html+=`<div style="font-size:11px;color:var(--text2);margin-top:4px">
+    <span class="jk-role-badge J" style="margin-right:4px">J</span>道路巡回員　
+    <span class="jk-role-badge U" style="margin-right:4px">U</span>道路巡回運行員
+  </div>`;
+  cal.innerHTML=html;
+}
+
+function saveJunkaiSched(key,role,memberId){
+  if(!DB.junkaiSchedule[key]) DB.junkaiSchedule[key]={J:'',U:''};
+  DB.junkaiSchedule[key][role]=String(memberId);
+  saveDB();
+}
+
+// ===== パターン自動生成 =====
+// パターン設定をDB保存
+function saveJunkaiPattern(idx, role, val){
+  if(!DB.settings.junkaiPattern) DB.settings.junkaiPattern=[];
+  if(!DB.settings.junkaiPattern[idx]) DB.settings.junkaiPattern[idx]={J:'',U:''};
+  DB.settings.junkaiPattern[idx][role]=val;
+  saveDB();
+}
+
+// パターン入力行を描画（3パターン×J/U）
+function renderJunkaiPatternRows(){
+  const rows=document.getElementById('junkai-pattern-rows');if(!rows)return;
+  const pat=DB.settings.junkaiPattern||[{J:'',U:''},{J:'',U:''},{J:'',U:''}];
+  const jMembers=DB.junkaiMaster.filter(m=>m.role==='J'||m.type==='backup');
+  const uMembers=DB.junkaiMaster.filter(m=>m.role==='U'||m.type==='backup');
+  const mkOpts=(members,sval)=>'<option value="">—未設定—</option>'+members.map(m=>`<option value="${m.id}"${String(m.id)===String(sval)?' selected':''}>${m.name}</option>`).join('');
+  rows.innerHTML=[0,1,2].map(i=>`
+    <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+      <span style="font-size:11px;color:var(--text2);min-width:70px">パターン${i+1}（${i*2+1}-${i*2+2}日目）</span>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="jk-role-badge J" style="font-size:10px">J</span>
+        <select style="padding:3px 7px;font-size:12px;background:var(--bg2);border:1px solid rgba(16,185,129,0.4);border-radius:5px;color:var(--text)"
+          onchange="saveJunkaiPattern(${i},'J',this.value)">${mkOpts(jMembers,(pat[i]||{}).J||'')}</select>
+      </div>
+      <div style="display:flex;align-items:center;gap:4px">
+        <span class="jk-role-badge U" style="font-size:10px">U</span>
+        <select style="padding:3px 7px;font-size:12px;background:var(--bg2);border:1px solid rgba(59,130,246,0.4);border-radius:5px;color:var(--text)"
+          onchange="saveJunkaiPattern(${i},'U',this.value)">${mkOpts(uMembers,(pat[i]||{}).U||'')}</select>
+      </div>
+    </div>`).join('');
+}
+
+function generateJunkaiSchedule(){
+  const pat=DB.settings.junkaiPattern||[];
+  if(pat.length<3||!pat[0]?.J||!pat[0]?.U||!pat[1]?.J||!pat[1]?.U||!pat[2]?.J||!pat[2]?.U){
+    showStatus('3つのパターン全てにJ・Uを設定してください','err');return;
+  }
+  const startDate=document.getElementById('jk-start-date').value;
+  const days=parseInt(document.getElementById('jk-gen-days').value)||365;
+  if(!startDate){showStatus('開始日を設定してください','err');return;}
+  const base=new Date(2026,3,1); // 4月1日（ローカル時間）
+  let count=0;
+  for(let i=0;i<days;i++){
+    const [sy,sm,sd]=startDate.split('-').map(Number);
+    const d=new Date(sy,sm-1,sd+i); // ローカル時間で加算
+    const diff=Math.floor((d-base)/86400000);
+    const cycle=((diff%6)+6)%6;
+    const patIdx=Math.floor(cycle/2);
+    const key=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    // IDを文字列に統一して保存
+    DB.junkaiSchedule[key]={J:String(pat[patIdx].J),U:String(pat[patIdx].U)};
+    count++;
+  }
+  saveDB();
+  renderJunkaiCalendar();
+  renderS1JunkaiMembers();
+  showStatus(`✅ ${count}日分のスケジュールを自動生成しました`,'ok');
+}
+
+// ===== 打合せ簿：当日巡回メンバー =====
+function renderS1JunkaiMembers(){
+  const dateStr=document.getElementById('kouji-date').value;
+  const area=document.getElementById('s1-junkai-members');if(!area)return;
+  if(!dateStr){area.innerHTML='<p style="font-size:12px;color:var(--text3)">日付を選択してください</p>';return;}
+
+  // キーをdateStr（YYYY-MM-DD）から直接生成
+  const key=dateStr; // "2026-06-08" のまま使用
+  const sc=DB.junkaiSchedule[key];
+
+  if(!sc||(!sc.J&&!sc.U)){
+    area.innerHTML=`<p style="font-size:12px;color:var(--text3)">この日（${dateStr}）のスケジュールが未登録です（道路巡回マスタで自動生成してください）</p>`;return;
+  }
+
+  let html='';
+  ['J','U'].forEach(role=>{
+    const mid=sc[role];if(!mid)return;
+    const member=DB.junkaiMaster.find(m=>String(m.id)===String(mid));if(!member)return;
+    const isBackup=member.type==='backup';
+    const roleSelHtml=isBackup?`
+      <select class="role-sel" style="font-size:10px;border:none;background:rgba(245,158,11,0.15);color:var(--accent);border-radius:4px;padding:1px 4px" onclick="event.stopPropagation()">
+        <option value="J">道路巡回員</option>
+        <option value="U">道路巡回運行員</option>
+        <option value="worker">作業員</option>
+        <option value="shokucho">職長</option>
+      </select>`:'';
+    html+=`<label class="jk-chip ${role} selected" onclick="onJkChipClick(event,this)">
+      <input type="checkbox" checked onchange="this.closest('.jk-chip').classList.toggle('selected',this.checked);calcTotals()" onclick="event.stopPropagation()">
+      <span class="jk-role-badge ${role}">${role}</span>
+      <span>${member.name}</span>
+      ${roleSelHtml}
+      <input class="hours-inp" type="number" placeholder="h" step="0.5" min="0" style="width:42px"
+        value="${getSetting('bulk-hours')||8}" oninput="calcTotals()" onclick="event.stopPropagation()">
+      <span style="font-size:10px;color:var(--text3)">h</span>
+    </label>`;
+  });
+  area.innerHTML=html||'<p style="font-size:12px;color:var(--text3)">メンバー未設定</p>';
+  calcTotals();
+}
+
+function onJkChipClick(e,chip){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT')return;
+  const cb=chip.querySelector('input[type=checkbox]');
+  if(cb){cb.checked=!cb.checked;chip.classList.toggle('selected',cb.checked);calcTotals();}
+}
+function addKantokuMaster(){
+  const name=document.getElementById('kt-name').value.trim();
+  const role=document.getElementById('kt-role').value;
+  if(!name)return;
+  DB.kantokuMaster.push({id:Date.now(),name,role});
+  saveDB();
+  document.getElementById('kt-name').value='';
+  renderKantokuMasterTable();renderKantokuList();renderKantokuSignArea();
+}
+function deleteKantokuMaster(id){
+  DB.kantokuMaster=DB.kantokuMaster.filter(k=>k.id!==id);
+  saveDB();
+  renderKantokuMasterTable();renderKantokuList();renderKantokuSignArea();
+}
+function renderKantokuMasterTable(){
+  const tbody=document.getElementById('kantoku-master-tbody');
+  if(!tbody)return;
+  tbody.innerHTML=DB.kantokuMaster.length===0?
+    `<tr><td colspan="3" style="color:var(--text3);font-size:12px;text-align:center">まだ登録されていません</td></tr>`:
+    DB.kantokuMaster.map(k=>`
+      <tr>
+        <td style="font-weight:500">${k.name}</td>
+        <td>${ROLE_MAP[k.role]||k.role}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteKantokuMaster(${k.id})">削除</button></td>
+      </tr>`).join('');
+}
+
+// ===== 安全巡視点検マスタ =====
+function addAnzenItem(){
+  const cat=document.getElementById('az-cat').value.trim();
+  const item=document.getElementById('az-item').value.trim();
+  const order=parseInt(document.getElementById('az-order').value)||99;
+  if(!cat||!item)return;
+  DB.anzenItems.push({id:Date.now(),cat,item,order});
+  saveDB();
+  document.getElementById('az-item').value='';
+  document.getElementById('az-order').value='';
+  renderAnzenMaster();renderAnzenCheckArea();refreshCatDatalist();
+}
+function deleteAnzenItem(id){
+  DB.anzenItems=DB.anzenItems.filter(a=>a.id!==id);
+  saveDB();renderAnzenMaster();renderAnzenCheckArea();refreshCatDatalist();
+}
+function loadDefaultAnzen(){
+  if(DB.anzenItems.length>0&&!confirm('既存の項目に追加します。よろしいですか？'))return;
+  const base=Date.now();
+  DEFAULT_ANZEN.forEach((d,i)=>{
+    if(!DB.anzenItems.some(a=>a.cat===d.cat&&a.item===d.item)){
+      DB.anzenItems.push({id:base+i,cat:d.cat,item:d.item,order:d.order});
+    }
+  });
+  saveDB();renderAnzenMaster();renderAnzenCheckArea();refreshCatDatalist();
+}
+function renderAnzenMaster(){
+  const sorted=[...DB.anzenItems].sort((a,b)=>a.cat.localeCompare(b.cat,'ja')||a.order-b.order);
+  document.getElementById('anzen-tbody').innerHTML=sorted.map(a=>`
+    <tr>
+      <td><span style="background:rgba(59,130,246,0.1);color:var(--accent3);padding:2px 8px;border-radius:4px;font-size:11px;font-weight:600">${a.cat}</span></td>
+      <td>${a.item}</td>
+      <td style="text-align:center">${a.order}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteAnzenItem(${a.id})">削除</button></td>
+    </tr>`).join('');
+}
+function refreshCatDatalist(){
+  const cats=[...new Set(DB.anzenItems.map(a=>a.cat))];
+  const dl=document.getElementById('az-cat-list');
+  if(dl) dl.innerHTML=cats.map(c=>`<option value="${c}">`).join('');
+}
+
+// ===== 安全巡視点検 AM/PM チェック欄 =====
+function renderAnzenCheckArea(){
+  const area=document.getElementById('anzen-check-area');
+  if(!area)return;
+  if(DB.anzenItems.length===0){
+    area.innerHTML='<p style="font-size:12px;color:var(--text3)">安全巡視点検マスタに項目を登録してください</p>';
+    return;
+  }
+  // カテゴリ別にグループ化
+  const cats=[...new Set(DB.anzenItems.map(a=>a.cat))];
+  // テーブル形式で構築
+  let html=`<table class="anzen-check-table">
+    <thead>
+      <tr>
+        <th style="width:50px">区分</th>
+        <th>点検項目</th>
+        <th style="width:40px">AM</th>
+        <th style="width:40px">PM</th>
+      </tr>
+    </thead>
+    <tbody>`;
+  cats.forEach(cat=>{
+    const items=[...DB.anzenItems.filter(a=>a.cat===cat)].sort((a,b)=>a.order-b.order);
+    items.forEach((item,i)=>{
+      const rowspan=i===0?` rowspan="${items.length}"`:'';
+      html+=`<tr>
+        ${i===0?`<td class="cat-cell"${rowspan}>${cat}</td>`:''}
+        <td>${item.item}</td>
+        <td style="text-align:center"><input type="checkbox" class="anzen-chk" id="az-am-${item.id}"></td>
+        <td style="text-align:center"><input type="checkbox" class="anzen-chk" id="az-pm-${item.id}"></td>
+      </tr>`;
+    });
+  });
+  html+=`</tbody></table>`;
+  area.innerHTML=html;
+}
+
+// ===== 化学物質トグル =====
+function toggleKagaku(blockId, chk){
+  const block=document.getElementById(blockId);if(!block)return;
+  if(chk.checked){
+    block.classList.remove('hidden');
+    renderKagakuBlock(blockId);
+  }else{
+    block.classList.add('hidden');
+  }
+}
+
+function renderKagakuBlock(blockId){
+  const block=document.getElementById(blockId);if(!block)return;
+  const opts='<option value="">選択してください</option>'+DB.kagaku.map(k=>`<option value="${k.id}">${k.name}</option>`).join('');
+  const selId='kgsel-'+blockId;
+  block.innerHTML=`
+    <div class="kagaku-title">⚗️ 化学物質リスクアセスメント</div>
+    <div class="form-row" style="margin-bottom:8px">
+      <div class="fg w-half"><label>使用化学物質</label>
+        <select id="${selId}" onchange="onKagakuSelect('${blockId}','${selId}')">${opts}</select>
+      </div>
+    </div>
+    <div id="${blockId}-detail"></div>`;
+}
+
+function onKagakuSelect(blockId, selId){
+  const sel=document.getElementById(selId);if(!sel)return;
+  const item=DB.kagaku.find(k=>k.id==sel.value);
+  const detail=document.getElementById(blockId+'-detail');if(!detail)return;
+  if(!item){detail.innerHTML='';return;}
+  const riskMap={high:'高',mid:'中',low:'低'};
+  const riskCls={high:'risk-high',mid:'risk-mid',low:'risk-low'};
+  detail.innerHTML=`
+    <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:8px">
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">リスクレベル</div>
+        <span class="risk-badge ${riskCls[item.risk]||'risk-mid'}">${riskMap[item.risk]||'中'}</span></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">危険有害性</div>
+        <div>${(item.hazards||[]).map(h=>`<span class="ppe-tag" style="color:var(--danger)">${h}</span>`).join('')||'—'}</div></div>
+      <div><div style="font-size:10px;color:var(--text3);margin-bottom:3px">必要PPE</div>
+        <div>${(item.ppe||[]).map(p=>`<span class="ppe-tag">${p}</span>`).join('')||'—'}</div></div>
+    </div>
+    ${item.note?`<div style="font-size:12px;color:var(--text2);background:var(--bg3);padding:7px 9px;border-radius:5px;margin-bottom:8px">📌 ${item.note}</div>`:''}
+    <button class="btn btn-ghost btn-sm" onclick="genKagakuAI('${blockId}','${item.id}')">✨ AI追加対策を生成</button>
+    <div class="ai-area" style="margin-top:6px"><div class="ai-label">AI追加対策</div><div class="ai-content" id="${blockId}-kgai">生成ボタンを押してください</div></div>`;
+}
+
+async function genKagakuAI(blockId, kagakuId){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const item=DB.kagaku.find(k=>k.id==kagakuId);if(!item)return;
+  const tenki=document.getElementById('tenki').value;
+  const prompt=`建設現場での化学物質取扱い作業において、以下の化学物質に対する安全対策を箇条書き5項目で作成してください。\n化学物質名:${item.name}\nリスクレベル:${{high:'高',mid:'中',low:'低'}[item.risk]}\n危険有害性:${(item.hazards||[]).join('、')}\n必要PPE:${(item.ppe||[]).join('、')}\n天気:${tenki}\n簡潔で実用的な追加対策を日本語で。`;
+  const el=document.getElementById(blockId+'-kgai');
+  el.innerHTML='<span class="ai-loading">✨ 生成中...</span>';
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:400,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'エラー';
+    el.innerHTML=text.replace(/\n/g,'<br>');
+  }catch(e){el.innerHTML='エラー: '+e.message;}
+}
+
+// ===== 化学物質マスタ =====
+function addKagaku(){
+  const name=document.getElementById('kg-name').value.trim();if(!name)return;
+  const risk=document.getElementById('kg-risk').value;
+  const note=document.getElementById('kg-note').value.trim();
+  const hazards=[...document.querySelectorAll('#kg-hazard-checks input:checked')].map(c=>c.value);
+  const ppe=[...document.querySelectorAll('#kg-ppe-checks input:checked')].map(c=>c.value);
+  DB.kagaku.push({id:Date.now(),name,risk,hazards,ppe,note});
+  saveDB();
+  document.getElementById('kg-name').value='';document.getElementById('kg-note').value='';
+  document.querySelectorAll('#kg-hazard-checks input,#kg-ppe-checks input').forEach(c=>c.checked=false);
+  renderKagakuMaster();refreshKagakuSelects();
+}
+function deleteKagaku(id){
+  DB.kagaku=DB.kagaku.filter(k=>k.id!==id);saveDB();renderKagakuMaster();refreshKagakuSelects();
+}
+function renderKagakuMaster(){
+  const riskMap={high:'高',mid:'中',low:'低'};
+  const riskCls={high:'risk-high',mid:'risk-mid',low:'risk-low'};
+  const tbody=document.getElementById('kagaku-tbody');if(!tbody)return;
+  tbody.innerHTML=DB.kagaku.map(k=>`
+    <tr>
+      <td style="font-weight:500">${k.name}</td>
+      <td><span class="risk-badge ${riskCls[k.risk]||'risk-mid'}">${riskMap[k.risk]||'中'}</span></td>
+      <td>${(k.hazards||[]).join('・')||'—'}</td>
+      <td>${(k.ppe||[]).join('・')||'—'}</td>
+      <td style="max-width:150px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${k.note||'—'}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteKagaku(${k.id})">削除</button></td>
+    </tr>`).join('');
+}
+function refreshKagakuSelects(){
+  const opts='<option value="">選択してください</option>'+DB.kagaku.map(k=>`<option value="${k.id}">${k.name}</option>`).join('');
+  document.querySelectorAll('[id^="kgsel-"]').forEach(sel=>{const v=sel.value;sel.innerHTML=opts;sel.value=v;});
+}
+
+// ===== 危険要因チェック =====
+const KIKEN_TYPES = {
+  ashiba: {
+    label: '🏗️ 足場',
+    fields: [
+      { label: '種類', type: 'select', opts: ['単管足場','くさび足場','枠組足場','吊り足場','その他'] },
+      { label: '高さ (m)', type: 'number', placeholder: '3.5' },
+      { label: '備考', type: 'text', placeholder: '備考' },
+    ]
+  },
+  kakusen: {
+    label: '⚡ 架空線',
+    fields: [
+      { label: '種類', type: 'select', opts: ['電力線','通信線','その他'] },
+      { label: '電圧 (kV)', type: 'number', placeholder: '6.6' },
+      { label: '離隔距離 (m)', type: 'number', placeholder: '2.0' },
+      { label: '備考', type: 'text', placeholder: '備考' },
+    ]
+  },
+  chika: {
+    label: '🔧 地下埋設',
+    fields: [
+      { label: '種類', type: 'select', opts: ['ガス管','水道管','電力ケーブル','通信ケーブル','その他'] },
+      { label: '埋設深さ (m)', type: 'number', placeholder: '1.2' },
+      { label: '管理者', type: 'text', placeholder: '〇〇会社' },
+      { label: '備考', type: 'text', placeholder: '備考' },
+    ]
+  }
+};
+
+function getKikenType(blockId) {
+  if (blockId.endsWith('-ashiba')) return 'ashiba';
+  if (blockId.endsWith('-kakusen')) return 'kakusen';
+  if (blockId.endsWith('-chika')) return 'chika';
+  return null;
+}
+
+function toggleKiken(blockId, chk) {
+  const block = document.getElementById(blockId);
+  if (!block) return;
+  if (chk.checked) {
+    block.classList.remove('hidden');
+    const type = getKikenType(blockId);
+    if (type) renderKikenDetail(block, blockId, type);
+  } else {
+    block.classList.add('hidden');
+    block.innerHTML = '';
+  }
+}
+
+function renderKikenDetail(block, blockId, type) {
+  const def = KIKEN_TYPES[type];
+  const aiId = blockId + '-ai';
+  const fieldsHtml = def.fields.map((f, i) => {
+    const fid = `${blockId}-f${i}`;
+    if (f.type === 'select') {
+      return `<div class="fg w-third"><label>${f.label}</label>
+        <select id="${fid}">${f.opts.map(o=>`<option>${o}</option>`).join('')}</select></div>`;
+    }
+    return `<div class="fg w-third"><label>${f.label}</label>
+      <input type="${f.type}" id="${fid}" placeholder="${f.placeholder||''}"></div>`;
+  }).join('');
+  block.innerHTML = `
+    <div class="kiken-detail-title">${def.label} 詳細</div>
+    <div class="form-row">${fieldsHtml}</div>
+    <button class="btn btn-ghost btn-sm" onclick="genKikenAI('${blockId}','${type}')" style="margin-top:6px">✨ AI注意事項を生成</button>
+    <div class="kiken-ai-area">
+      <div class="kiken-ai-label">AI注意事項</div>
+      <div class="kiken-ai-content" id="${aiId}">生成ボタンを押してください</div>
+    </div>`;
+}
+
+async function genKikenAI(blockId, type) {
+  const apiKey = localStorage.getItem('gemini_key') || document.getElementById('api-key').value;
+  if (!apiKey) { alert('Gemini APIキーを入力してください'); return; }
+  const def = KIKEN_TYPES[type];
+  const tenki = document.getElementById('tenki').value;
+  const kion = document.getElementById('kion').value;
+  // 入力値を収集
+  const vals = def.fields.map((f, i) => {
+    const el = document.getElementById(`${blockId}-f${i}`);
+    return el ? `${f.label}: ${el.value}` : '';
+  }).filter(Boolean).join('、');
+  const prompt = `建設現場で以下の状況がある作業での安全注意事項を箇条書き5項目で作成してください。\n危険要因: ${def.label.replace(/[🏗️⚡🔧]/g,'').trim()}\n${vals}\n天気: ${tenki}、気温: ${kion}℃\n実用的な注意事項を日本語で。`;
+  const el = document.getElementById(blockId + '-ai');
+  if (el) el.innerHTML = '<span class="ai-loading">✨ 生成中...</span>';
+  try {
+    const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }], generationConfig: { maxOutputTokens: 400, temperature: 0.7 } })
+    });
+    const data = await res.json();
+    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || 'エラーが発生しました';
+    if (el) el.innerHTML = text.replace(/\n/g, '<br>');
+  } catch(e) {
+    if (el) el.innerHTML = 'エラー: ' + e.message;
+  }
+}
+
+// ===== 交通誘導トグル =====
+function toggleKotsu(blockId, trackEl){
+  const block=document.getElementById(blockId);
+  const thumb=trackEl.querySelector('.toggle-thumb');
+  if(!block)return;
+  const isOn=thumb.classList.contains('on');
+  if(isOn){
+    // オフにする
+    thumb.classList.remove('on');trackEl.classList.add('off');
+    block.classList.add('hidden');
+  }else{
+    // オンにする
+    thumb.classList.add('on');trackEl.classList.remove('off');
+    block.classList.remove('hidden');
+    // Canvas初期化（遅延）
+    const canvases=block.querySelectorAll('.sign-canvas');
+    setTimeout(()=>canvases.forEach(c=>initCanvas(c.id)),50);
+  }
+}
+function saveDB(){
+  localStorage.setItem('anzen_db3',JSON.stringify(DB));
+  // GAS URLが設定されていればマスタも自動同期
+  const gasUrl=getSetting('gas-url');
+  if(gasUrl) syncMasterToGAS(gasUrl);
+}
+
+// ===== GASマスタ同期 =====
+// マスタ保存（GASへ送信）
+async function syncMasterToGAS(gasUrl){
+  if(!gasUrl)return;
+  const master={
+    jimuin:DB.jimuin, kantokuMaster:DB.kantokuMaster,
+    junkaiMaster:DB.junkaiMaster, junkaiSchedule:DB.junkaiSchedule,
+    companies:DB.companies, koushu:DB.koushu,
+    shiki:DB.shiki, kagaku:DB.kagaku, anzenItems:DB.anzenItems,
+    settings:DB.settings
+  };
+  try{
+    await fetch(gasUrl,{
+      method:'POST', redirect:'follow',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({type:'saveMaster', master})
+    });
+  }catch(e){
+    // サイレントに失敗（UIには通知しない）
+    console.warn('マスタ同期エラー:',e.message);
+  }
+}
+
+// マスタ取得（GASから取得）
+async function loadMasterFromGAS(){
+  const gasUrl=getSetting('gas-url');
+  if(!gasUrl)return false;
+  const statusEl=document.getElementById('master-sync-status');
+  if(statusEl) statusEl.textContent='📡 GASからマスタ取得中...';
+  try{
+    const res=await fetch(gasUrl+'?action=getMaster',{method:'GET',redirect:'follow'});
+    const text=await res.text();
+    const data=JSON.parse(text);
+    if(!data.master){
+      if(statusEl) statusEl.textContent='⚠️ GASにマスタデータがありません（このデバイスが初回です）';
+      return false;
+    }
+    // マスタをDBに反映
+    const m=data.master;
+    if(m.jimuin) DB.jimuin=m.jimuin;
+    if(m.kantokuMaster) DB.kantokuMaster=m.kantokuMaster;
+    if(m.junkaiMaster) DB.junkaiMaster=m.junkaiMaster;
+    if(m.junkaiSchedule) DB.junkaiSchedule=m.junkaiSchedule;
+    if(m.companies) DB.companies=m.companies;
+    if(m.koushu) DB.koushu=m.koushu;
+    if(m.shiki) DB.shiki=m.shiki;
+    if(m.kagaku) DB.kagaku=m.kagaku;
+    if(m.anzenItems) DB.anzenItems=m.anzenItems;
+    // settingsはAPIキー等を上書きしないよう個別マージ
+    if(m.settings){
+      Object.keys(m.settings).forEach(k=>{
+        if(k!=='gemini_key') DB.settings[k]=m.settings[k];
+      });
+    }
+    localStorage.setItem('anzen_db3',JSON.stringify(DB));
+    const savedAt=data.savedAt||'';
+    if(statusEl) statusEl.textContent=`✅ マスタ取得完了（最終保存：${savedAt}）`;
+    return true;
+  }catch(e){
+    if(statusEl) statusEl.textContent='⚠️ GAS接続エラー（ローカルデータを使用）: '+e.message;
+    return false;
+  }
+}
+
+function saveSetting(k,v){DB.settings[k]=v;saveDB();}
+function getSetting(k,def=''){return DB.settings[k]||def;}
+
+function showTab(name,btn){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('sec-'+name).classList.add('active');
+  btn.classList.add('active');
+  // タブ切替時に再描画が必要なものを更新
+  if(name==='master-jimuin'){
+    renderJimuinMaster();
+    refreshJunkaiNameSelect();
+  }
+  if(name==='ky'){
+    // KYタブを開いたら打合せ簿の日付を引き継ぎ
+    const date=document.getElementById('kouji-date').value;
+    const dateEl=document.getElementById('ky-date');
+    if(dateEl&&date&&dateEl.textContent==='—') syncKyFromUchiawase();
+    // GAS URLが設定済みなら体調チェック自動取得
+    if(getSetting('gas-url')) fetchKyCheck();
+    // ky-form-url設定読み込み
+    const fuEl=document.getElementById('ky-form-url');
+    if(fuEl&&getSetting('ky-form-url')) fuEl.value=getSetting('ky-form-url');
+  }
+  if(name==='master-junkai'){
+    renderJunkaiMemberTable();
+    renderJunkaiPatternRows();
+    refreshJunkaiNameSelect();
+  }
+  if(name==='master-kantoku'){
+    renderKantokuMasterTable();
+  }
+  if(name==='master-koushu'){
+    renderKoushuMaster();
+    refreshKoushuDatalist();
+  }
+}
+
+function getChiku(d){
+  // タイムゾーン安全な日付差分計算
+  const [y,m,day]=d.split('-').map(Number);
+  const start=new Date(2026,3,1); // 月は0始まりなので4月=3
+  const target=new Date(y,m-1,day);
+  const diff=Math.floor((target-start)/86400000);
+  return diff%2===0?'R191号':'R9号';
+}
+function updateChiku(){
+  const d=document.getElementById('kouji-date').value;if(!d)return;
+  const ch=getChiku(d),isH=ch==='R191号',cls=isH?'chiku-hagi':'chiku-yama';
+  const badge=`<span class="chiku-badge ${cls}">${ch}</span>`;
+  const el2=document.getElementById('s1-chiku');
+  if(el2) el2.innerHTML=`<span class="chiku-badge ${cls}" style="font-size:12px;padding:2px 8px">${ch}</span>`;
+  renderS1JunkaiMembers();
+  // GASからその日のデータを自動取得・復元
+  const gasUrl=getSetting('gas-url');
+  if(gasUrl){
+    showStatus('データ取得中...','ok');
+    loadUchiawaseFromGAS(d).then(ok=>{
+      if(ok){
+        showStatus('データを復元しました ✓','ok');
+      }else{
+        // データなし → 前日引き継ぎ＋消去ボタン表示
+        loadYesterday();
+        showNewDayBanner(d);
+      }
+    });
+  }
+}
+
+function showNewDayBanner(date){
+  const existing=document.getElementById('new-day-banner');
+  if(existing)existing.remove();
+  const banner=document.createElement('div');
+  banner.id='new-day-banner';
+  banner.style.cssText='background:rgba(245,158,11,0.12);border:1px solid var(--accent);border-radius:6px;padding:8px 12px;margin-bottom:10px;display:flex;align-items:center;gap:10px;font-size:12px;';
+  banner.innerHTML=`<span style="color:var(--accent)">📋 ${date}の新規データです。前日データを引き継ぎました。</span>
+    <button class="btn btn-ghost btn-sm" onclick="clearUchiawase();document.getElementById('new-day-banner').remove()">🗑️ 消去</button>`;
+  const card=document.querySelector('#sec-uchiawase .card');
+  if(card)card.insertBefore(banner,card.firstChild);
+}
+
+function clearUchiawase(){
+  document.getElementById('kouji-name').value='萩保守工事';
+  document.getElementById('tenki').value='晴れ';
+  document.getElementById('kion').value='';
+  document.getElementById('renraku').value='';
+  const s1=document.getElementById('s1-shiki');if(s1)s1.value='';
+  sagyouIds.forEach(id=>document.getElementById('block-'+id)?.remove());
+  sagyouIds=[];
+  calcTotals();
+  showStatus('消去しました','ok');
+}
+
+// ===== 手書きサイン =====
+const signState={};
+function initCanvas(canvasId){
+  const canvas=document.getElementById(canvasId);
+  if(!canvas||signState[canvasId]) return;
+  const ctx=canvas.getContext('2d');
+  ctx.strokeStyle='#1a1a2e';ctx.lineWidth=2;ctx.lineCap='round';ctx.lineJoin='round';
+  let drawing=false,lastX=0,lastY=0;
+  function getPos(e){
+    const rect=canvas.getBoundingClientRect();
+    if(e.touches){return{x:(e.touches[0].clientX-rect.left)*(canvas.width/rect.width),y:(e.touches[0].clientY-rect.top)*(canvas.height/rect.height)};}
+    return{x:(e.clientX-rect.left)*(canvas.width/rect.width),y:(e.clientY-rect.top)*(canvas.height/rect.height)};
+  }
+  function start(e){e.preventDefault();drawing=true;const p=getPos(e);lastX=p.x;lastY=p.y;}
+  function move(e){
+    e.preventDefault();if(!drawing)return;
+    const p=getPos(e);
+    ctx.beginPath();ctx.moveTo(lastX,lastY);ctx.lineTo(p.x,p.y);ctx.stroke();
+    lastX=p.x;lastY=p.y;
+    canvas.classList.add('signed');
+  }
+  function end(e){e.preventDefault();drawing=false;}
+  canvas.addEventListener('mousedown',start);canvas.addEventListener('mousemove',move);canvas.addEventListener('mouseup',end);canvas.addEventListener('mouseleave',end);
+  canvas.addEventListener('touchstart',start,{passive:false});canvas.addEventListener('touchmove',move,{passive:false});canvas.addEventListener('touchend',end);
+  signState[canvasId]=true;
+}
+
+function clearCanvas(canvasId){
+  const canvas=document.getElementById(canvasId);if(!canvas)return;
+  canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+  canvas.classList.remove('signed');
+}
+
+function updateSignLabel(canvasId,selectId){
+  const sel=document.getElementById(selectId);if(!sel)return;
+  const nameEl=document.getElementById(canvasId+'-name');
+  if(nameEl) nameEl.textContent=sel.value||'—';
+}
+
+function initAllCanvases(){
+  document.querySelectorAll('.sign-canvas').forEach(c=>initCanvas(c.id));
+}
+
+// 職長セレクト更新
+function refreshShokuchoSelects(){
+  const shokucho=DB.jimuin.filter(j=>j.role==='shokucho');
+  const opts='<option value="">選択</option>'+shokucho.map(j=>`<option value="${j.name}">${j.name}（${j.company||''}）</option>`).join('');
+  document.querySelectorAll('.shokucho-sel').forEach(sel=>{const v=sel.value;sel.innerHTML=opts;sel.value=v;});
+}
+
+// 監督サインエリア更新
+function renderKantokuSignArea(){
+  const kantoku=DB.kantokuMaster.filter(k=>['dairi','kanri'].includes(k.role));
+  const row=document.getElementById('kantoku-sign-row');
+  if(!row)return;
+  if(kantoku.length===0){
+    row.innerHTML='<p style="font-size:12px;color:var(--text3)">監督マスタに現場代理人・監理技術者を登録するとサイン欄が表示されます</p>';
+    return;
+  }
+  row.innerHTML=kantoku.map(k=>`
+    <div class="sign-item">
+      <div class="sign-label">${ROLE_MAP[k.role]}</div>
+      <div class="sign-name">${k.name}</div>
+      <canvas class="sign-canvas" id="kt-sign-${k.id}" width="160" height="70"></canvas>
+      <div class="sign-btns"><button class="btn btn-ghost btn-sm" onclick="clearCanvas('kt-sign-${k.id}')">消去</button></div>
+    </div>`).join('');
+  kantoku.forEach(k=>initCanvas('kt-sign-'+k.id));
+}
+
+// ===== 人員マスタ =====
+// 会社名を会社マスタに自動登録（D列の値をそのまま種別に使用）
+function autoAddCompanyRaw(name, ukeoi_raw){
+  if(!name) return;
+  if(DB.companies.some(c=>c.name===name)) return;
+  DB.companies.push({id:Date.now()+Math.random()*100|0, name, type:ukeoi_raw.trim()||'元請'});
+}
+
+function autoAddCompany(name, ukeoi){
+  if(!name) return;
+  if(DB.companies.some(c=>c.name===name)) return;
+  DB.companies.push({id:Date.now()+Math.random()*100|0, name, type:ukeoi||'元請'});
+}
+
+// 会社マスタで交通誘導種別かどうか判定
+function isKotsuCompany(companyName){
+  const c=DB.companies.find(x=>x.name===companyName);
+  return c&&(c.type==='kotsu'||c.type==='kotsu2');
+}
+
+// 実効的な請種類を返す（交通誘導会社なら上書き）
+function getEffectiveUkeoi(jimuin){
+  const c=DB.companies.find(x=>x.name===jimuin.company);
+  if(c&&c.type==='kotsu') return 'kotsu';
+  if(c&&c.type==='kotsu2') return 'kotsu2';
+  return jimuin.ukeoi||'元請';
+}
+
+// 請種類バッジ（D列の文字列をそのまま表示）
+function ukeoiBadge(ukeoi){
+  const kotsuTypes=['kotsu','kotsu2'];
+  const cls=kotsuTypes.includes(ukeoi)?'ukeoi-kotsu':
+    (ukeoi.includes('二次')||ukeoi.includes('2次'))?'ukeoi-ni':
+    (ukeoi.includes('一次')||ukeoi.includes('1次'))?'ukeoi-ichi':'ukeoi-motouke';
+  const label=ukeoi==='kotsu'?'交通誘導':ukeoi==='kotsu2'?'交通誘導(2次)':ukeoi;
+  return `<span class="ukeoi-badge ${cls}">${label}</span>`;
+}
+
+// 役職選択肢（請種類文字列に対応）
+function getRoleOptions(ukeoi){
+  if(ukeoi==='kotsu'||ukeoi==='kotsu2') return ROLE_OPTIONS.kotsu;
+  if(ukeoi.includes('二次')||ukeoi.includes('2次')) return ROLE_OPTIONS.ni;
+  if(ukeoi.includes('一次')||ukeoi.includes('1次')) return ROLE_OPTIONS.ichi;
+  return ROLE_OPTIONS.motouke; // 元請
+}
+
+function addJimuin(){
+  const name=document.getElementById('j-name').value.trim();
+  const company=document.getElementById('j-company').value;
+  const ukeoi=document.getElementById('j-ukeoi')?.value||'motouke';
+  const role=document.getElementById('j-role').value;
+  if(!name)return;
+  // 会社マスタに自動登録
+  autoAddCompany(company, ukeoi);
+  DB.jimuin.push({id:Date.now(),name,company,ukeoi,role,fromGAS:false});
+  saveDB();document.getElementById('j-name').value='';
+  renderJimuinMaster();renderJimuinSelects();refreshShokuchoSelects();renderKantokuSignArea();
+  renderCompanyMaster();refreshAllCompanySelects();refreshJCompanySelect();
+}
+function deleteJimuin(id){
+  DB.jimuin=DB.jimuin.filter(j=>j.id!==id);saveDB();
+  renderJimuinMaster();renderJimuinSelects();refreshShokuchoSelects();renderKantokuSignArea();
+}
+function renderJimuinMaster(){
+  const tbody=document.getElementById('jimuin-tbody');if(!tbody)return;
+  const total=DB.jimuin.length;
+  tbody.innerHTML=DB.jimuin.map((j,i)=>{
+    const eff=getEffectiveUkeoi(j);
+    return `<tr>
+      <td>
+        <div class="sort-btns">
+          <button class="sort-btn" onclick="moveJimuin(${i},-1)" ${i===0?'disabled':''}>▲</button>
+          <button class="sort-btn" onclick="moveJimuin(${i},1)" ${i===total-1?'disabled':''}>▼</button>
+        </div>
+      </td>
+      <td style="font-weight:500">${j.name}${j.fromGAS?'<span style="font-size:9px;color:var(--accent3);margin-left:4px">GAS</span>':''}</td>
+      <td>${j.company||'—'}</td>
+      <td>${ukeoiBadge(eff)}</td>
+      <td>${buildRoleRadios(j)}</td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteJimuin(${j.id})">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+
+// ===== 上下ボタン並び替え =====
+function moveJimuin(idx, dir){
+  const newIdx=idx+dir;
+  if(newIdx<0||newIdx>=DB.jimuin.length)return;
+  const item=DB.jimuin.splice(idx,1)[0];
+  DB.jimuin.splice(newIdx,0,item);
+  saveDB();
+  renderJimuinMaster();renderJimuinSelects();refreshShokuchoSelects();
+}
+function renderJimuinSelects(){
+  // 自社作業員：worker・shokucho・junkai・unten を全員表示
+  const jishaRoles=['worker','shokucho','junkai','unten','anzen'];
+  const jisha=DB.jimuin.filter(j=>{
+    const eff=getEffectiveUkeoi(j);
+    return jishaRoles.includes(j.role)&&eff!=='kotsu'&&eff!=='kotsu2'&&!['dairi','kanri'].includes(j.role);
+  });
+  const list=document.getElementById('jisha-worker-list');
+  if(list){
+    if(jisha.length===0){
+      list.innerHTML='<p style="font-size:12px;color:var(--text3)">人員マスタに作業員・職長を登録してください</p>';
+    }else{
+      const chipRoleOpts=(j)=>{
+        const opts=getRoleOptions(getEffectiveUkeoi(j));
+        return opts.map(o=>`<option value="${o.value}"${j.role===o.value?' selected':''}>${o.label}</option>`).join('');
+      };
+      list.innerHTML=jisha.map(j=>`
+        <label class="worker-chip" id="wchip-${j.id}" onclick="onChipClick(event,this)">
+          <input type="checkbox" id="wchk-${j.id}"
+            onchange="this.closest('.worker-chip').classList.toggle('selected',this.checked);calcTotals()"
+            onclick="event.stopPropagation()">
+          <span class="chip-name">${j.name}</span>
+          <select class="role-sel" id="wrole-${j.id}" onclick="event.stopPropagation()" onchange="event.stopPropagation()">
+            ${chipRoleOpts(j)}
+          </select>
+          <input class="hours-inp" type="number" placeholder="h" step="0.5" min="0"
+            value="${getSetting('bulk-hours')||''}" oninput="calcTotals()" onclick="event.stopPropagation()">
+          <span style="font-size:10px;color:var(--text3)">h</span>
+        </label>`).join('');
+    }
+  }
+  // 監督リスト（kantokuMasterから描画）
+  const kl=document.getElementById('kantoku-list');
+  if(kl){
+    kl.innerHTML=DB.kantokuMaster.length===0?'<p style="font-size:12px;color:var(--text3)">監督マスタに登録してください</p>':
+      DB.kantokuMaster.map(k=>`<div class="form-row" style="margin-bottom:5px;align-items:center">
+        <div style="min-width:90px;font-size:11px;color:var(--text2)">${ROLE_MAP[k.role]}</div>
+        <div style="font-size:13px;font-weight:500;flex:1">${k.name}</div>
+        <div class="fg" style="max-width:75px"><label>人数</label><input type="number" value="1" min="0" style="padding:4px 7px" oninput="calcTotals()"></div>
+      </div>`).join('');
+  }
+  refreshJCompanySelect();calcTotals();
+  refreshJunkaiNameSelect();
+}
+
+// チップクリック処理（ラベルクリックでチェックトグル）
+function onChipClick(e,chip){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='SELECT') return;
+  const cb=chip.querySelector('input[type=checkbox]');
+  if(cb){ cb.checked=!cb.checked; chip.classList.toggle('selected',cb.checked); calcTotals(); }
+}
+
+function refreshJCompanySelect(){
+  const sel=document.getElementById('j-company');if(!sel)return;
+  const v=sel.value;sel.innerHTML='<option value="">選択</option>'+DB.companies.map(c=>`<option value="${c.name}">${c.name}</option>`).join('');sel.value=v;
+}
+
+// ===== 会社マスタ =====
+function addCompany(){
+  const name=document.getElementById('c-name').value.trim(),type=document.getElementById('c-type').value;
+  if(!name)return;DB.companies.push({id:Date.now(),name,type});saveDB();
+  document.getElementById('c-name').value='';renderCompanyMaster();refreshAllCompanySelects();refreshJCompanySelect();
+}
+function deleteCompany(id){DB.companies=DB.companies.filter(c=>c.id!==id);saveDB();renderCompanyMaster();refreshAllCompanySelects();refreshJCompanySelect();}
+function renderCompanyMaster(){
+  const fallback={jisha:'元請',shita:'下請',shita1:'1次下請',shita2:'2次下請',motouke:'元請',ichi:'1次下請',ni:'2次下請',kotsu:'交通誘導',kotsu2:'交通誘導(2次)','元請':'元請','一次下請':'1次下請','二次下請':'2次下請'};
+  const tbody=document.getElementById('company-tbody');if(!tbody)return;
+  tbody.innerHTML=DB.companies.map(c=>{
+    const isKotsu=c.type==='kotsu'||c.type==='kotsu2';
+    const dispType=fallback[c.type]||c.type;
+    // 全種別を直接選択できるセレクトボックス
+    const typeOpts=[
+      {v:'元請',l:'元請'},{v:'一次下請',l:'1次下請'},{v:'二次下請',l:'2次下請'},
+      {v:'kotsu',l:'交通誘導'},{v:'kotsu2',l:'交通誘導(2次)'}
+    ].map(o=>`<option value="${o.v}"${c.type===o.v?' selected':''}>${o.l}</option>`).join('');
+    return `<tr>
+      <td style="font-weight:500">${c.name}${isKotsu?'<span style="font-size:9px;color:var(--accent3);margin-left:4px">✓</span>':''}</td>
+      <td>
+        <select style="padding:3px 6px;font-size:11px;background:var(--bg3);border:1px solid var(--border);border-radius:4px;color:var(--text);max-width:120px"
+          onchange="updateCompanyType('${c.id}',this.value)">
+          ${typeOpts}
+        </select>
+      </td>
+      <td><button class="btn btn-danger btn-sm" onclick="deleteCompany(${c.id})">削除</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function updateCompanyType(id, newType){
+  if(!newType)return;
+  // IDは文字列・数値どちらでも一致するよう比較
+  const c=DB.companies.find(x=>String(x.id)===String(id));
+  if(!c){showStatus('会社が見つかりません','err');return;}
+  c.type=newType;
+  // saveDB()はGAS同期を含むため直接localStorageに保存
+  localStorage.setItem('anzen_db3',JSON.stringify(DB));
+  renderCompanyMaster();
+  renderJimuinMaster();
+  renderJimuinSelects();
+  refreshAllCompanySelects();
+  showStatus('会社種別を更新しました ✓','ok');
+}
+// 作業ブロック用（交通誘導を除く）
+function getCompanyOpts(){
+  return '<option value="">選択</option>'+DB.companies
+    .filter(c=>c.type!=='kotsu'&&c.type!=='kotsu2')
+    .map(c=>`<option value="${c.name}" data-type="${c.type}">${c.name}</option>`).join('');
+}
+// 交通誘導ブロック用（交通誘導のみ）
+function getKotsuCompanyOpts(){
+  const kotsu=DB.companies.filter(c=>c.type==='kotsu'||c.type==='kotsu2');
+  // 交通誘導会社がなければ全社表示（フォールバック）
+  const list=kotsu.length>0?kotsu:DB.companies;
+  return '<option value="">選択</option>'+list
+    .map(c=>`<option value="${c.name}" data-type="${c.type}">${c.name}</option>`).join('');
+}
+function refreshAllCompanySelects(){document.querySelectorAll('.co-sel').forEach(sel=>{const v=sel.value;sel.innerHTML=getCompanyOpts();sel.value=v;});}
+function isJisha(name){
+  const c=DB.companies.find(x=>x.name===name);
+  // 'jisha'（旧）または '元請'（新）のどちらでも自社と判定
+  return c&&(c.type==='jisha'||c.type==='元請');
+}
+
+// ===== 会社行追加 =====
+function addCompanyRow(containerId,blockId){
+  const container=document.getElementById(containerId);if(!container)return;
+  if(container.querySelectorAll('.company-row').length>=3){alert('最大3社まで追加できます');return;}
+  const rid='cr_'+Date.now();const div=document.createElement('div');
+  div.className='company-row';div.id=rid;
+  const isKotsuBlock=blockId&&(blockId.startsWith('kotsu-')||blockId==='s1-kotsu');
+  const opts=isKotsuBlock?getKotsuCompanyOpts():getCompanyOpts();
+  div.innerHTML=`
+    <div class="fg"><label>会社名</label><select class="co-sel" onchange="onCoChange(this,'${rid}')">${opts}</select></div>
+    <div id="${rid}-ninzu-wrap" class="fg num"><label>人数</label><input type="number" min="0" placeholder="0" oninput="calcTotals()"></div>
+    <div id="${rid}-hours-wrap" class="fg num"><label>時間(h)</label><input type="number" min="0" placeholder="8" step="0.5" oninput="calcTotals()"></div>
+    <button class="btn btn-ghost btn-sm" style="padding:4px 8px" onclick="document.getElementById('${rid}').remove();calcTotals()">✕</button>
+    <div id="${rid}-jisha" style="display:none;flex:0 0 100%;flex-wrap:wrap;gap:6px;margin-top:6px"></div>`;
+  container.appendChild(div);
+  // 追加直後に最初の会社を自動選択してリストを表示
+  const sel=div.querySelector('select.co-sel');
+  if(sel&&sel.options.length>1){
+    sel.selectedIndex=1;
+    onCoChange(sel,rid);
+  }
+  calcTotals();
+}
+
+function onCoChange(sel,rid){
+  const wrap=document.getElementById(rid+'-jisha');
+  const ninzuWrap=document.getElementById(rid+'-ninzu-wrap');
+  const hoursWrap=document.getElementById(rid+'-hours-wrap');
+  if(!wrap)return;
+  if(isJisha(sel.value)){
+    // 自社：選択した会社の作業員のみ表示
+    // 除外リスト：監督マスタ登録者・巡回レギュラー
+    const kantokuNames=DB.kantokuMaster.map(k=>k.name);
+    const junkaiRegularNames=DB.junkaiMaster.filter(m=>m.type==='regular').map(m=>m.name);
+    const excludeNames=[...new Set([...kantokuNames,...junkaiRegularNames])];
+    const jishaWorkers=DB.jimuin.filter(j=>{
+      const eff=getEffectiveUkeoi(j);
+      return j.company===sel.value
+        &&eff!=='kotsu'&&eff!=='kotsu2'
+        &&!excludeNames.includes(j.name);
+    });
+    if(ninzuWrap) ninzuWrap.style.display='none';
+    wrap.style.display='flex';
+    wrap.style.flexWrap='wrap';
+    wrap.innerHTML=jishaWorkers.length===0
+      ?'<p style="font-size:12px;color:var(--text3)">人員マスタに作業員を登録してください</p>'
+      :jishaWorkers.map(j=>`
+        <label class="worker-chip" onclick="onChipClick(event,this)">
+          <input type="checkbox" onchange="this.closest('.worker-chip').classList.toggle('selected',this.checked);calcTotals()" onclick="event.stopPropagation()">
+          <span class="chip-name">${j.name}</span>
+          <select class="role-sel" onclick="event.stopPropagation()" onchange="event.stopPropagation()">
+            ${(getRoleOptions(getEffectiveUkeoi(j))||[]).map(o=>`<option value="${o.value}"${j.role===o.value?' selected':''}>${o.label}</option>`).join('')}
+          </select>
+          <input class="hours-inp" type="number" placeholder="h" step="0.5" min="0" style="width:42px"
+            value="${getSetting('bulk-hours')||8}" oninput="calcTotals()" onclick="event.stopPropagation()">
+          <span style="font-size:10px;color:var(--text3)">h</span>
+        </label>`).join('');
+  }else{
+    // 下請：人数欄を表示、作業員チップを非表示
+    if(ninzuWrap) ninzuWrap.style.display='flex';
+    wrap.style.display='none';
+    wrap.innerHTML='';
+  }
+  calcTotals();
+}
+
+// ===== 一括時間 =====
+function applyBulkHours(){
+  const v=document.getElementById('bulk-hours').value;saveSetting('bulk-hours',v);
+  document.querySelectorAll('#jisha-worker-list .hours-inp').forEach(inp=>inp.value=v);calcTotals();
+}
+
+// ===== 工種マスタ =====
+function addKoushu(){
+  const k=document.getElementById('k-koushu').value.trim();
+  const s=document.getElementById('k-shubetsu').value.trim();
+  const a=document.getElementById('k-sagyou').value.trim();
+  if(!k||!s||!a){ showStatus('工種・種別・作業内容を全て入力してください','err'); return; }
+  // 重複チェック
+  if(DB.koushu.some(x=>x.koushu===k&&x.shubetsu===s&&x.sagyou===a)){
+    showStatus('同じ組み合わせがすでに登録されています','err'); return;
+  }
+  DB.koushu.push({id:Date.now(),koushu:k,shubetsu:s,sagyou:a});
+  saveDB();
+  ['k-koushu','k-shubetsu','k-sagyou'].forEach(id=>document.getElementById(id).value='');
+  renderKoushuMaster();
+  refreshKoushuDatalist();
+  showStatus(`「${k} > ${s} > ${a}」を追加しました ✓`,'ok');
+}
+
+function deleteKoushu(id){
+  DB.koushu=DB.koushu.filter(k=>k.id!==id);
+  saveDB();renderKoushuMaster();refreshKoushuDatalist();
+}
+
+// ===== 打合せ簿からのクイックマスタ登録 =====
+function quickAddKoushuFromInput(id){
+  const k=document.getElementById('ko-inp-'+id)?.value.trim()||'';
+  const s=document.getElementById('sh-inp-'+id)?.value.trim()||'';
+  const a=document.getElementById('sa-inp-'+id)?.value.trim()||'';
+  const msgEl=document.getElementById('koushu-reg-msg-'+id);
+  if(!k||!s||!a){
+    if(msgEl){msgEl.textContent='工種・種別・作業内容を入力してください';msgEl.style.color='var(--danger)';}
+    setTimeout(()=>{if(msgEl)msgEl.textContent='';},2000);
+    return;
+  }
+  if(DB.koushu.some(x=>x.koushu===k&&x.shubetsu===s&&x.sagyou===a)){
+    if(msgEl){msgEl.textContent='✓ すでに登録済みです';msgEl.style.color='var(--text3)';}
+    setTimeout(()=>{if(msgEl)msgEl.textContent='';},2000);
+    return;
+  }
+  DB.koushu.push({id:Date.now(),koushu:k,shubetsu:s,sagyou:a});
+  saveDB();refreshKoushuDatalist();
+  if(msgEl){
+    msgEl.textContent=`✅ 「${k} > ${s} > ${a}」をマスタに登録しました`;
+    msgEl.style.color='var(--accent2)';
+    setTimeout(()=>{if(msgEl)msgEl.textContent='';},3000);
+  }
+}
+
+// input変更時の種別・作業内容候補更新
+function onKoushuInput(id){
+  const k=document.getElementById('ko-inp-'+id)?.value||'';
+  const sList=[...new Set(DB.koushu.filter(x=>!k||x.koushu===k).map(x=>x.shubetsu))];
+  const dl=document.getElementById('shubetsu-list-'+id);
+  if(dl) dl.innerHTML=sList.map(s=>`<option value="${s}">`).join('');
+  onShubetsuInput(id);
+}
+function onShubetsuInput(id){
+  const k=document.getElementById('ko-inp-'+id)?.value||'';
+  const s=document.getElementById('sh-inp-'+id)?.value||'';
+  const aList=[...new Set(DB.koushu.filter(x=>(!k||x.koushu===k)&&(!s||x.shubetsu===s)).map(x=>x.sagyou))];
+  const dl=document.getElementById('sagyou-list-'+id);
+  if(dl) dl.innerHTML=aList.map(a=>`<option value="${a}">`).join('');
+}
+
+// 旧select版との互換（AI生成で使用）
+function getKoushuValFromBlock(id){
+  return document.getElementById('ko-inp-'+id)?.value||document.getElementById('ko-sel-'+id)?.value||'';
+}
+function getShubetsuValFromBlock(id){
+  return document.getElementById('sh-inp-'+id)?.value||document.getElementById('sh-sel-'+id)?.value||'';
+}
+function getSagyouValFromBlock(id){
+  return document.getElementById('sa-inp-'+id)?.value||document.getElementById('sa-sel-'+id)?.value||'';
+}
+
+function renderKoushuMaster(){
+  const fk=document.getElementById('filter-koushu')?.value||'';
+  const fs=document.getElementById('filter-shubetsu')?.value||'';
+  const filtered=DB.koushu.filter(k=>
+    (!fk||k.koushu===fk)&&(!fs||k.shubetsu===fs)
+  );
+  const tbody=document.getElementById('koushu-tbody');if(!tbody)return;
+  if(filtered.length===0){
+    tbody.innerHTML=`<tr><td colspan="4" style="text-align:center;color:var(--text3);font-size:12px">${DB.koushu.length===0?'まだ登録されていません':'該当なし'}</td></tr>`;
+  }else{
+    tbody.innerHTML=filtered.map(k=>`
+      <tr>
+        <td>${k.koushu}</td>
+        <td>${k.shubetsu}</td>
+        <td>${k.sagyou}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteKoushu(${k.id})">削除</button></td>
+      </tr>`).join('');
+  }
+  // フィルタセレクト更新
+  refreshKoushuFilterSelects(fk,fs);
+}
+
+function refreshKoushuFilterSelects(currentK,currentS){
+  const fkSel=document.getElementById('filter-koushu');
+  const fsSel=document.getElementById('filter-shubetsu');
+  if(!fkSel||!fsSel)return;
+  const kList=[...new Set(DB.koushu.map(k=>k.koushu))].sort();
+  fkSel.innerHTML='<option value="">すべて</option>'+kList.map(k=>`<option value="${k}"${k===currentK?' selected':''}>${k}</option>`).join('');
+  const sList=currentK
+    ?[...new Set(DB.koushu.filter(k=>k.koushu===currentK).map(k=>k.shubetsu))].sort()
+    :[...new Set(DB.koushu.map(k=>k.shubetsu))].sort();
+  fsSel.innerHTML='<option value="">すべて</option>'+sList.map(s=>`<option value="${s}"${s===currentS?' selected':''}>${s}</option>`).join('');
+}
+
+function clearKoushuFilter(){
+  const fk=document.getElementById('filter-koushu');
+  const fs=document.getElementById('filter-shubetsu');
+  if(fk) fk.value='';if(fs) fs.value='';
+  renderKoushuMaster();
+}
+
+// datalist更新
+function refreshKoushuDatalist(){
+  const kList=[...new Set(DB.koushu.map(k=>k.koushu))];
+  const dl=document.getElementById('koushu-list');
+  if(dl) dl.innerHTML=kList.map(k=>`<option value="${k}">`).join('');
+  refreshShubetsuList();
+}
+
+function refreshShubetsuList(){
+  const k=document.getElementById('k-koushu')?.value||'';
+  const sList=k
+    ?[...new Set(DB.koushu.filter(x=>x.koushu===k).map(x=>x.shubetsu))]
+    :[...new Set(DB.koushu.map(x=>x.shubetsu))];
+  const dl=document.getElementById('shubetsu-list');
+  if(dl) dl.innerHTML=sList.map(s=>`<option value="${s}">`).join('');
+  refreshSagyouList();
+}
+
+function refreshSagyouList(){
+  const k=document.getElementById('k-koushu')?.value||'';
+  const s=document.getElementById('k-shubetsu')?.value||'';
+  const aList=k&&s
+    ?DB.koushu.filter(x=>x.koushu===k&&x.shubetsu===s).map(x=>x.sagyou)
+    :k?DB.koushu.filter(x=>x.koushu===k).map(x=>x.sagyou)
+    :DB.koushu.map(x=>x.sagyou);
+  const dl=document.getElementById('sagyou-list');
+  if(dl) dl.innerHTML=[...new Set(aList)].map(a=>`<option value="${a}">`).join('');
+}
+
+function getKoushuOpts(){return[...new Set(DB.koushu.map(k=>k.koushu))].map(k=>`<option value="${k}">${k}</option>`).join('');}
+function updateShubetsu(id){
+  const k=document.getElementById('ko-sel-'+id).value;
+  const list=[...new Set(DB.koushu.filter(x=>x.koushu===k).map(x=>x.shubetsu))];
+  document.getElementById('sh-sel-'+id).innerHTML='<option value="">選択</option>'+list.map(s=>`<option value="${s}">${s}</option>`).join('');
+  updateSagyouNaiyou(id);
+}
+function updateSagyouNaiyou(id){
+  const k=document.getElementById('ko-sel-'+id).value,s=document.getElementById('sh-sel-'+id).value;
+  const list=DB.koushu.filter(x=>x.koushu===k&&x.shubetsu===s).map(x=>x.sagyou);
+  document.getElementById('sa-sel-'+id).innerHTML='<option value="">選択</option>'+list.map(a=>`<option value="${a}">${a}</option>`).join('');
+}
+
+// ===== 資機材マスタ =====
+function addShikiMaster(){
+  const name=document.getElementById('sk-name').value.trim();if(!name)return;
+  DB.shiki.push({id:Date.now(),name});saveDB();document.getElementById('sk-name').value='';renderShikiMaster();refreshAllShikiSelects();
+}
+function deleteShikiM(id){DB.shiki=DB.shiki.filter(s=>s.id!==id);saveDB();renderShikiMaster();refreshAllShikiSelects();}
+function renderShikiMaster(){
+  document.getElementById('shiki-tbody').innerHTML=DB.shiki.map(s=>`<tr><td>${s.name}</td><td><button class="btn btn-danger btn-sm" onclick="deleteShikiM(${s.id})">削除</button></td></tr>`).join('');
+}
+function getShikiOpts(){return'<option value="">選択</option>'+DB.shiki.map(s=>`<option value="${s.name}">${s.name}</option>`).join('');}
+function refreshAllShikiSelects(){
+  // datalistを更新（input+datalist方式）
+  const opts=DB.shiki.map(s=>`<option value="${s.name}">`).join('');
+  const dl=document.getElementById('shiki-list');if(dl) dl.innerHTML=opts;
+}
+
+// ===== 作業2〜動的追加 =====
+let sagyouIds=[];
+function addSagyou(data){
+  const idx=sagyouIds.length+2,id='s'+Date.now();sagyouIds.push(id);
+  const div=document.createElement('div');div.className='card';div.id='card-'+id;
+  div.innerHTML=buildSagyouHTML(id,idx,data);
+  document.getElementById('sagyou-dynamic').appendChild(div);
+  const skSel=document.getElementById('sk-inp-'+id);if(skSel)skSel.innerHTML=getShikiOpts();
+  refreshShokuchoSelects();
+  setTimeout(()=>{initCanvas(id+'-sign');},50);
+  calcTotals();
+}
+function buildSagyouHTML(id,idx){
+  return `
+    <div class="card-title">🔨 作業${idx}<button class="btn btn-danger btn-sm ml" onclick="removeSagyou('${id}')">削除</button></div>
+    <div class="sagyou-block">
+      <div class="form-row">
+        <div class="fg w-third">
+          <label>工種</label>
+          <input type="text" id="ko-inp-${id}" placeholder="工種を入力" list="koushu-list"
+            oninput="onKoushuInput('${id}')" autocomplete="off">
+        </div>
+        <div class="fg w-third">
+          <label>種別</label>
+          <input type="text" id="sh-inp-${id}" placeholder="種別を入力" list="shubetsu-list-${id}"
+            oninput="onShubetsuInput('${id}')" autocomplete="off">
+          <datalist id="shubetsu-list-${id}"></datalist>
+        </div>
+        <div class="fg w-third">
+          <label>作業内容</label>
+          <input type="text" id="sa-inp-${id}" placeholder="作業内容を入力" list="sagyou-list-${id}"
+            autocomplete="off">
+          <datalist id="sagyou-list-${id}"></datalist>
+        </div>
+      </div>
+      <!-- 工種マスタ登録 -->
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="quickAddKoushuFromInput('${id}')" style="font-size:11px">
+          📝 この工種・種別・作業内容をマスタに登録
+        </button>
+        <span id="koushu-reg-msg-${id}" style="font-size:11px;color:var(--accent2)"></span>
+      </div>
+      <div class="form-row">
+        <div class="fg w-half"><label>資機材</label>
+          <input type="text" class="shiki-inp" id="sk-inp-${id}" placeholder="資機材を入力" list="shiki-list" autocomplete="off">
+        </div>
+        <div class="fg w-half"><label>備考</label><input type="text" id="biko-${id}" placeholder="備考"></div>
+      </div>
+      <div id="co-${id}"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addCompanyRow('co-${id}','${id}')" style="margin-top:6px">＋ 会社追加</button>
+      <button class="btn btn-ghost btn-sm" onclick="genAI('${id}')" style="margin-top:6px">✨ AI安全指示</button>
+      <div class="ai-area"><div class="ai-label">AI安全指示事項</div><div class="ai-content" id="${id}-ai">生成ボタンを押してください</div></div>
+      <!-- 手書き安全指示欄 -->
+      <div style="margin-top:8px">
+        <label style="font-size:11px;color:var(--text2);font-weight:500">✏️ 手書き安全指示欄</label>
+        <textarea id="tegaki-${id}" placeholder="安全指示事項を手書き入力してください" style="margin-top:4px;min-height:64px"></textarea>
+      </div>
+      <!-- 化学物質チェック -->
+      <div style="margin-top:10px;padding:8px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:12px;font-weight:600;color:var(--text)">
+          <input type="checkbox" id="kagaku-chk-${id}" onchange="toggleKagaku('kagaku-block-${id}',this)" style="width:15px;height:15px;accent-color:var(--danger)">
+          ⚗️ 化学物質使用あり
+        </label>
+      </div>
+      <div id="kagaku-block-${id}" class="kagaku-block hidden"></div>
+      <!-- 危険要因チェック -->
+      <div class="kiken-check-wrap">
+        <div class="kiken-check-title">⚠️ 危険要因の有無</div>
+        <div class="kiken-check-row">
+          <label class="kiken-chk-label">
+            <input type="checkbox" onchange="toggleKiken('${id}-ashiba',this)" style="accent-color:var(--accent)">
+            🏗️ 足場あり
+          </label>
+          <label class="kiken-chk-label">
+            <input type="checkbox" onchange="toggleKiken('${id}-kakusen',this)" style="accent-color:var(--accent)">
+            ⚡ 架空線あり
+          </label>
+          <label class="kiken-chk-label">
+            <input type="checkbox" onchange="toggleKiken('${id}-chika',this)" style="accent-color:var(--accent)">
+            🔧 地下埋設あり
+          </label>
+        </div>
+        <div id="${id}-ashiba" class="kiken-detail hidden"></div>
+        <div id="${id}-kakusen" class="kiken-detail hidden"></div>
+        <div id="${id}-chika" class="kiken-detail hidden"></div>
+      </div>
+      <!-- 職長サイン -->
+      <div class="sign-block">
+        <div class="sign-block-title">✍️ 職長サイン</div>
+        <div class="sign-row">
+          <div class="sign-item">
+            <div class="sign-label">職長</div>
+            <canvas class="sign-canvas" id="${id}-sign" width="160" height="70"></canvas>
+            <div class="sign-btns"><button class="btn btn-ghost btn-sm" onclick="clearCanvas('${id}-sign')">消去</button></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 交通誘導トグル -->
+    <div style="display:flex;align-items:center;gap:10px;margin-top:10px;padding:8px 10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border);">
+      <span style="font-size:12px;font-weight:600;color:var(--accent3)">🚦 交通誘導</span>
+      <label style="display:flex;align-items:center;gap:6px;margin-left:auto;cursor:pointer;font-size:12px;color:var(--text2)">
+        <span>あり</span>
+        <div class="toggle-track" onclick="toggleKotsu('kotsu-block-${id}',this)">
+          <div class="toggle-thumb on"></div>
+        </div>
+        <span>なし</span>
+      </label>
+    </div>
+    <div class="kotsu-block" id="kotsu-block-${id}">
+      <div class="kotsu-title">🚦 交通誘導</div>
+      <div class="form-row">
+        <div class="fg w-half"><label>規制形式</label>
+          <select id="kotsu-form-${id}"><option>片側交互通行</option><option>車線規制</option><option>路肩規制</option><option>通行止</option></select>
+        </div>
+      </div>
+      <div id="kotsu-co-${id}"></div>
+      <button class="btn btn-ghost btn-sm" onclick="addCompanyRow('kotsu-co-${id}','kotsu-${id}')" style="margin-top:4px">＋ 会社追加</button>
+      <button class="btn btn-ghost btn-sm" onclick="genAI('kotsu-${id}')" style="margin-top:4px">✨ AI安全指示</button>
+      <div class="ai-area"><div class="ai-label">交通誘導 AI安全指示</div><div class="ai-content" id="kotsu-${id}-ai">生成ボタンを押してください</div></div>
+      <!-- 交通誘導職長サイン -->
+      <div class="sign-block">
+        <div class="sign-block-title">✍️ 交通誘導 職長サイン</div>
+        <div class="sign-row">
+          <div class="sign-item">
+            <div class="sign-label">職長</div>
+            <canvas class="sign-canvas" id="${id}-kotsu-sign" width="160" height="70"></canvas>
+            <div class="sign-btns"><button class="btn btn-ghost btn-sm" onclick="clearCanvas('${id}-kotsu-sign')">消去</button></div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+function removeSagyou(id){
+  sagyouIds=sagyouIds.filter(s=>s!==id);document.getElementById('card-'+id).remove();
+  document.querySelectorAll('#sagyou-dynamic .card').forEach((card,i)=>{
+    const t=card.querySelector('.card-title');if(!t)return;
+    const btn=t.querySelector('button');t.childNodes[0].textContent='🔨 作業'+(i+2);
+  });calcTotals();
+}
+
+// ===== 資材搬入 =====
+let shizaiCount=0;
+function addShizai(){
+  shizaiCount++;const id='sz-'+shizaiCount;
+  document.getElementById('shizai-empty').style.display='none';
+  const div=document.createElement('div');div.className='rsc-row';div.id=id;
+  div.innerHTML=`
+    <div class="form-row">
+      <div class="fg w2"><label>名称</label><input type="text" placeholder="〇〇資材"></div>
+      <div class="fg w-quarter"><label>数量</label><input type="text" placeholder="10本"></div>
+      <div class="fg w-quarter"><label>搬入時間</label><input type="time"></div>
+    </div>
+    <div class="form-row">
+      <div class="fg w2"><label>取引先</label><input type="text" placeholder="株式会社〇〇"></div>
+      <div class="fg"><label>備考</label><input type="text" placeholder="備考"></div>
+      <button class="btn btn-danger btn-sm" style="margin-bottom:1px" onclick="document.getElementById('${id}').remove();checkShizaiEmpty()">✕</button>
+    </div>`;
+  document.getElementById('shizai-list').appendChild(div);
+}
+function checkShizaiEmpty(){if(!document.getElementById('shizai-list').children.length)document.getElementById('shizai-empty').style.display='block';}
+
+// ===== 集計 =====
+function calcTotals(){
+  let jishaCount=0, jishaHours=0, shitaCount=0, shitaHours=0;
+
+  // 道路巡回メンバー（作業1固定）
+  document.querySelectorAll('#s1-junkai-members .jk-chip').forEach(chip=>{
+    const cb=chip.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked){
+      jishaCount++;
+      const h=chip.querySelector('.hours-inp');
+      jishaHours+=parseFloat(h?.value||0)||0;
+    }
+  });
+
+  // 作業ブロックの会社行から集計
+  document.querySelectorAll('.company-row').forEach(row=>{
+    const sel=row.querySelector('select.co-sel');
+    if(!sel||!sel.value)return;
+    if(isJisha(sel.value)){
+      // 自社：チェック済み作業員を集計
+      row.querySelectorAll('.worker-chip').forEach(chip=>{
+        const cb=chip.querySelector('input[type=checkbox]');
+        if(cb&&cb.checked){
+          jishaCount++;
+          const h=chip.querySelector('.hours-inp');
+          jishaHours+=parseFloat(h?.value||0)||0;
+        }
+      });
+    }else{
+      // 下請：人数×時間
+      const ninzuInp=row.querySelector(`#${row.id}-ninzu-wrap input`)||row.querySelector('input[type=number]');
+      const hoursInp=row.querySelector(`#${row.id}-hours-wrap input`);
+      const n=parseInt(ninzuInp?.value||0)||0;
+      const h=parseFloat(hoursInp?.value||0)||0;
+      shitaCount+=n;
+      shitaHours+=n*h;
+    }
+  });
+
+  // 監督
+  let kantokuCount=0;
+  document.querySelectorAll('#kantoku-list input[type=number]').forEach(inp=>kantokuCount+=parseInt(inp.value)||0);
+
+  const totalP=jishaCount+shitaCount+kantokuCount;
+  const totalH=jishaHours+shitaHours;
+
+  // 当月累計
+  const currentDate=document.getElementById('kouji-date').value||new Date().toISOString().split('T')[0];
+  const nendo=getNendo(currentDate);
+  const monthHours=DB.history
+    .filter(h=>h.date&&getNendo(h.date)===nendo&&h.date!==currentDate)
+    .reduce((sum,h)=>sum+(parseFloat(h.totalH)||0),0);
+  const manualH=parseFloat(getSetting('cum-hours-manual'))||0;
+  const cumMonthH=monthHours+manualH+totalH;
+  const cumP=parseInt(getSetting('cum-people'))||0;
+
+  document.getElementById('total-people').textContent=totalP+' 人';
+  document.getElementById('total-hours').textContent=totalH.toFixed(1)+' h';
+  document.getElementById('total-hours-cum').textContent=cumMonthH.toFixed(1)+' h';
+  document.getElementById('total-people-cum').textContent=(totalP+cumP)+' 人';
+}
+
+// ===== AI安全指示カスタマイズ設定のプレビュー更新 =====
+function updateAIPromptPreview(){
+  const count=getSetting('ai-item-count')||'5';
+  const style=getSetting('ai-style')||'normal';
+  const extra=getSetting('ai-extra-prompt')||'';
+  const styleLabel={simple:'簡潔',normal:'標準',detail:'詳しく'}[style]||'標準';
+  const el=document.getElementById('ai-prompt-preview');
+  if(el) el.textContent=`${count}項目・${styleLabel}スタイルで生成${extra?'・追加条件あり':''}`;
+}
+
+// カスタマイズ設定からプロンプトの末尾条件を構築
+function buildAIInstruction(){
+  const count=getSetting('ai-item-count')||'5';
+  const style=getSetting('ai-style')||'normal';
+  const extra=getSetting('ai-extra-prompt')||'';
+  const styleText={
+    simple:'各項目は1〜2文の簡潔な表現で。',
+    normal:'各項目は実用的で具体的な表現で。',
+    detail:'各項目は背景・対策・確認事項を含む詳しい表現で。'
+  }[style]||'';
+  let inst=`箇条書き${count}項目で作成してください。${styleText}日本語で。`;
+  if(extra) inst+=`\n追加条件：${extra}`;
+  return inst;
+}
+
+// ===== AI安全指示 =====
+async function genAI(blockId){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const tenki=document.getElementById('tenki').value,kion=document.getElementById('kion').value;
+  const date=document.getElementById('kouji-date').value;
+  const inst=buildAIInstruction();
+  let prompt='';
+  if(blockId==='s1'){
+    const ch=getChiku(date),shiki=document.getElementById('s1-shiki')?.value||'';
+    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n工種:道路巡回工\n種別:道路巡回\n作業内容:${ch}\n資機材:${shiki}\n天気:${tenki}\n気温:${kion}℃`;
+  }else if(blockId==='s1-kotsu'){
+    const form=document.getElementById('s1-kotsu-form')?.value||'';
+    prompt=`交通誘導作業（${form}）の安全指示事項を${inst}\n天気:${tenki}`;
+  }else if(blockId.startsWith('kotsu-')){
+    const sid=blockId.replace('kotsu-','');
+    const form=document.getElementById('kotsu-form-'+sid)?.value||'';
+    prompt=`交通誘導作業（${form}）の安全指示事項を${inst}\n天気:${tenki}`;
+  }else{
+    const k=getKoushuValFromBlock(blockId);
+    const s=getShubetsuValFromBlock(blockId);
+    const a=getSagyouValFromBlock(blockId);
+    const sk=document.getElementById('sk-inp-'+blockId)?.value||'';
+    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n工種:${k}\n種別:${s}\n作業内容:${a}\n資機材:${sk}\n天気:${tenki}\n気温:${kion}℃`;
+  }
+  const el=document.getElementById(blockId+'-ai');
+  if(!el)return;
+  el.innerHTML='<span class="ai-loading">✨ 生成中...</span>';
+  try{
+    const count=parseInt(getSetting('ai-item-count')||'5');
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:count*150,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'エラーが発生しました';
+    el.innerHTML=text.replace(/\n/g,'<br>');
+  }catch(e){el.innerHTML='エラー: '+e.message;}
+}
+
+// ===== 前日引き継ぎ =====
+function loadYesterday(){
+  if(!DB.history.length){showStatus('前日データがありません','err');return;}
+  const yest=DB.history[DB.history.length-1];
+  if(!confirm('前日（'+yest.date+'）のデータを引き継ぎますか？'))return;
+  document.getElementById('kouji-name').value=yest.koujiName||'';
+  document.getElementById('tenki').value=yest.tenki||'晴れ';
+  document.getElementById('kion').value=yest.kion||'';
+  document.getElementById('renraku').value='';
+  if(yest.s1Shiki)document.getElementById('s1-shiki').value=yest.s1Shiki;
+  document.getElementById('sagyou-dynamic').innerHTML='';sagyouIds=[];
+  (yest.sagyouCount||0);
+  updateChiku();showStatus('前日データを引き継ぎました','ok');calcTotals();
+}
+
+// ===== 保存 =====
+async function saveUchiawase(){
+  const date=document.getElementById('kouji-date').value;
+  if(!date){showStatus('日付を入力してください','err');return;}
+  const snapshot=collectUchiawaseSnapshot();
+  snapshot.type='saveUchiawase';
+  snapshot.savedAt=new Date().toISOString();
+  const idx=DB.history.findIndex(h=>h.date===date);
+  if(idx>=0)DB.history[idx]=snapshot;else DB.history.push(snapshot);
+  if(DB.history.length>365)DB.history=DB.history.slice(-365);
+  saveDB();calcTotals();
+  const gasUrl=getSetting('gas-url');
+  if(gasUrl){
+    try{
+      await fetch(gasUrl,{method:'POST',redirect:'follow',
+        headers:{'Content-Type':'application/json'},body:JSON.stringify(snapshot)});
+      syncMasterToGAS(gasUrl);
+      showStatus('スプレッドシートに保存しました ✓','ok');
+    }catch(e){showStatus('ローカルに保存しました（GAS接続エラー: '+e.message+'）','err');}
+  }else{showStatus('ローカルに保存しました ✓','ok');}
+}
+
+function collectUchiawaseSnapshot(){
+  const date=document.getElementById('kouji-date').value;
+  const snap={date,
+    koujiName:document.getElementById('kouji-name').value||'',
+    tenki:document.getElementById('tenki').value||'',
+    kion:document.getElementById('kion').value||'',
+    chiku:getChiku(date),
+    renraku:document.getElementById('renraku').value||'',
+    s1Shiki:document.getElementById('s1-shiki')?.value||'',
+    s1Junkai:[],sagyouBlocks:[],shizai:[],totalH:0
+  };
+  document.querySelectorAll('#s1-junkai-members .jk-chip').forEach(chip=>{
+    const cb=chip.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked){
+      const n=chip.querySelector('span:not(.jk-role-badge)');
+      const h=chip.querySelector('.hours-inp');
+      const r=chip.querySelector('.role-sel');
+      snap.s1Junkai.push({name:n?.textContent.trim()||'',hours:parseFloat(h?.value||0)||0,role:r?.value||''});
+      snap.totalH+=parseFloat(h?.value||0)||0;
+    }
+  });
+  sagyouIds.forEach(id=>{
+    const block={id,
+      koushu:getKoushuValFromBlock(id),shubetsu:getShubetsuValFromBlock(id),sagyou:getSagyouValFromBlock(id),
+      shiki:document.getElementById('sk-inp-'+id)?.value||'',
+      biko:document.getElementById('biko-'+id)?.value||'',
+      tegaki:document.getElementById('tegaki-'+id)?.value||'',
+      companies:[]};
+    document.querySelectorAll('#co-'+id+' .company-row').forEach(row=>{
+      const sel=row.querySelector('select.co-sel');if(!sel||!sel.value)return;
+      const co={name:sel.value,jisha:isJisha(sel.value),workers:[],ninzu:0,hours:0};
+      if(co.jisha){
+        row.querySelectorAll('.worker-chip').forEach(chip=>{
+          const cb=chip.querySelector('input[type=checkbox]');
+          if(cb&&cb.checked){
+            const n=chip.querySelector('.chip-name');
+            const h=chip.querySelector('.hours-inp');
+            const r=chip.querySelector('.role-sel');
+            co.workers.push({name:n?.textContent.trim()||'',hours:parseFloat(h?.value||0)||0,role:r?.value||''});
+            snap.totalH+=parseFloat(h?.value||0)||0;
+          }
+        });
+      }else{
+        const ninzuInp=row.querySelector('#'+row.id+'-ninzu-wrap input')||row.querySelector('input[type=number]');
+        const hoursInp=row.querySelector('#'+row.id+'-hours-wrap input');
+        co.ninzu=parseInt(ninzuInp?.value||0)||0;
+        co.hours=parseFloat(hoursInp?.value||0)||0;
+        snap.totalH+=co.ninzu*co.hours;
+      }
+      block.companies.push(co);
+    });
+    snap.sagyouBlocks.push(block);
+  });
+  document.querySelectorAll('.rsc-row').forEach(row=>{
+    const inputs=row.querySelectorAll('input,select');
+    snap.shizai.push({name:inputs[0]?.value||'',suryo:inputs[1]?.value||'',
+      torihiki:inputs[2]?.value||'',time:inputs[3]?.value||'',biko:inputs[4]?.value||''});
+  });
+  return snap;
+}
+
+async function loadUchiawaseFromGAS(date){
+  const gasUrl=getSetting('gas-url');if(!gasUrl)return false;
+  try{
+    const res=await fetch(gasUrl+'?action=getUchiawase&date='+date,{method:'GET',redirect:'follow'});
+    const json=JSON.parse(await res.text());
+    if(!json.data)return false;
+    restoreUchiawase(json.data);return true;
+  }catch(e){return false;}
+}
+
+function restoreUchiawase(snap){
+  if(!snap)return;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!==undefined)el.value=val;};
+  set('kouji-name',snap.koujiName);
+  set('tenki',snap.tenki);
+  set('kion',snap.kion);
+  set('renraku',snap.renraku||'');
+  set('s1-shiki',snap.s1Shiki||'');
+  // 作業2〜再構築
+  sagyouIds.forEach(id=>document.getElementById('block-'+id)?.remove());
+  sagyouIds=[];
+  if(snap.sagyouBlocks&&snap.sagyouBlocks.length>0){
+    snap.sagyouBlocks.forEach((block,i)=>{
+      addSagyou();
+      const id=sagyouIds[sagyouIds.length-1];
+      setTimeout(()=>{
+        const koEl=document.getElementById('ko-inp-'+id);if(koEl)koEl.value=block.koushu||'';
+        const shEl=document.getElementById('sh-inp-'+id);if(shEl)shEl.value=block.shubetsu||'';
+        const saEl=document.getElementById('sa-inp-'+id);if(saEl)saEl.value=block.sagyou||'';
+        const skEl=document.getElementById('sk-inp-'+id);if(skEl)skEl.value=block.shiki||'';
+        const biEl=document.getElementById('biko-'+id);if(biEl)biEl.value=block.biko||'';
+        const teEl=document.getElementById('tegaki-'+id);if(teEl)teEl.value=block.tegaki||'';
+        if(block.companies&&block.companies.length>0){
+          block.companies.forEach(co=>{
+            addCompanyRow('co-'+id,id);
+            const rows=document.querySelectorAll('#co-'+id+' .company-row');
+            const lastRow=rows[rows.length-1];
+            if(lastRow){
+              const sel=lastRow.querySelector('select.co-sel');
+              if(sel){sel.value=co.name;onCoChange(sel,lastRow.id);}
+              if(!co.jisha){
+                const ninzuInp=lastRow.querySelector('#'+lastRow.id+'-ninzu-wrap input')||lastRow.querySelector('input[type=number]');
+                const hoursInp=lastRow.querySelector('#'+lastRow.id+'-hours-wrap input');
+                if(ninzuInp)ninzuInp.value=co.ninzu||0;
+                if(hoursInp)hoursInp.value=co.hours||0;
+              }
+            }
+          });
+        }
+      },150);
+    });
+  }
+  calcTotals();
+}
+
+// ===== PDF出力（ブラウザ印刷方式・A3横） =====
+function exportPDF(){
+  const date=document.getElementById('kouji-date').value;
+  const koujiName=document.getElementById('kouji-name').value;
+  const tenki=document.getElementById('tenki').value;
+  const kion=document.getElementById('kion').value;
+  const chiku=getChiku(date);
+  const renraku=document.getElementById('renraku').value;
+
+  // 人員集計
+  let jishaNames=[],jishaHours=0,jishaCount=0;
+  document.querySelectorAll('#jisha-worker-list .worker-chip').forEach(chip=>{
+    const cb=chip.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked){
+      jishaCount++;
+      const h=chip.querySelector('.hours-inp');
+      jishaHours+=parseFloat(h?.value||0)||0;
+      const n=chip.querySelector('.chip-name');
+      const r=chip.querySelector('.role-sel');
+      const roleLabel=ROLE_MAP[r?.value||'worker']||'作業員';
+      if(n) jishaNames.push({name:n.textContent.trim(),role:roleLabel,hours:parseFloat(h?.value||0)||0});
+    }
+  });
+  const shitaN=parseInt(document.getElementById('shita-ninzu')?.value)||0;
+  const shitaH=parseFloat(document.getElementById('shita-hours')?.value)||0;
+  let kantokuCount=0;
+  document.querySelectorAll('#kantoku-list input[type=number]').forEach(inp=>kantokuCount+=parseInt(inp.value)||0);
+  const totalP=jishaCount+shitaN+kantokuCount;
+  const totalH=(jishaHours+(shitaN*shitaH)).toFixed(1);
+  const cumP=(parseInt(getSetting('cum-people'))||0)+totalP;
+  // 年度累計：履歴から自動計算（4月始まり）
+  const nendoPDF=getNendo(date||'');
+  const nendoH=DB.history.filter(h=>h.date&&getNendo(h.date)===nendoPDF&&h.date!==date).reduce((s,h)=>s+(parseFloat(h.totalH)||0),0);
+  const manualH2=parseFloat(getSetting('cum-hours-manual'))||0;
+  const cumH=(nendoH+manualH2+parseFloat(totalH)).toFixed(1);
+
+  // 作業データ収集
+  function getCompaniesHTML(containerId){
+    const container=document.getElementById(containerId);if(!container)return'';
+    let html='';
+    container.querySelectorAll('.company-row').forEach(row=>{
+      const sel=row.querySelector('select');
+      const inp=row.querySelector('input[type=number]');
+      if(sel&&sel.value) html+=`<div class="p-company">${sel.value} <span class="p-ninzu">${inp?.value||0}名</span></div>`;
+    });
+    return html;
+  }
+
+  // 自社作業員（チェック済み）の氏名＋役職HTML
+  function buildJishaHTML(){
+    if(!jishaNames.length)return'';
+    return '<div class="p-jisha-sep"></div>'+jishaNames.map(j=>
+      `<div class="p-company"><span class="p-worker-role">${j.role}</span> ${j.name} <span class="p-ninzu">${j.hours}h</span></div>`
+    ).join('');
+  }
+
+  function getSignImg(canvasId){
+    const c=document.getElementById(canvasId);
+    if(!c||!c.classList.contains('signed')) return '<div class="p-sign-empty"></div>';
+    return `<img src="${c.toDataURL('image/png')}" class="p-sign-img">`;
+  }
+
+  // 作業行HTML生成
+  function buildSagyouRows(){
+    let html='';
+    // 作業1
+    const s1Ai=(document.getElementById('s1-ai')?.innerHTML||'').replace(/<[^>]+>/g,'\n').replace(/\n+/g,'\n').trim();
+    const s1Tegaki=document.getElementById('s1-tegaki')?.value||'';
+    const s1Shokucho=document.getElementById('s1-shokucho')?.value||'';
+    html+=buildOneRow({
+      label:'作業1',koushu:'道路巡回工',shubetsu:'道路巡回',sagyou:chiku,
+      shiki:document.getElementById('s1-shiki')?.value||'',
+      ai:s1Ai,tegaki:s1Tegaki,shokucho:s1Shokucho,
+      signId:'s1-sign',
+      companiesHtml:getCompaniesHTML('s1-companies')+buildJishaHTML(),
+      hours:jishaHours>0?`${jishaHours.toFixed(0)}h`:'',
+    });
+    // 作業1 交通誘導
+    if(!document.getElementById('s1-kotsu-block')?.classList.contains('hidden')){
+      const kotsuForm=document.getElementById('s1-kotsu-form')?.value||'';
+      const kotsuSC=document.getElementById('s1-kotsu-shokucho')?.value||'';
+      html+=buildKotsuRow({form:kotsuForm,shokucho:kotsuSC,signId:'s1-kotsu-sign',companiesHtml:getCompaniesHTML('s1-kotsu-companies')});
+    }
+    // 作業2〜
+    sagyouIds.forEach((id,i)=>{
+      const koushu=getKoushuValFromBlock(id);
+      const shubetsu=getShubetsuValFromBlock(id);
+      const sagyou=getSagyouValFromBlock(id);
+      const shiki=document.getElementById('sk-inp-'+id)?.value||'';
+      const ai=(document.getElementById(id+'-ai')?.innerHTML||'').replace(/<[^>]+>/g,'\n').replace(/\n+/g,'\n').trim();
+      const tegaki=document.getElementById('tegaki-'+id)?.value||'';
+      const shokucho=document.getElementById('sc-sel-'+id)?.value||'';
+      html+=buildOneRow({
+        label:`作業${i+2}`,koushu,shubetsu,sagyou,shiki,ai,tegaki,shokucho,
+        signId:id+'-sign',
+        companiesHtml:getCompaniesHTML('co-'+id),
+        hours:'',
+      });
+      if(!document.getElementById('kotsu-block-'+id)?.classList.contains('hidden')){
+        const kotsuForm=document.getElementById('kotsu-form-'+id)?.value||'';
+        const kotsuSC=document.getElementById('kotsu-sc-sel-'+id)?.value||'';
+        html+=buildKotsuRow({form:kotsuForm,shokucho:kotsuSC,signId:id+'-kotsu-sign',companiesHtml:getCompaniesHTML('kotsu-co-'+id)});
+      }
+    });
+    return html;
+  }
+
+  function buildOneRow({label,koushu,shubetsu,sagyou,shiki,ai,tegaki,shokucho,signId,companiesHtml,hours}){
+    return `<tr class="p-work-row">
+      <td class="p-label-cell">${label}</td>
+      <td class="p-koushu-cell"><div class="p-koushu">${koushu}</div><div class="p-shubetsu">${shubetsu}</div><div class="p-sagyou">${sagyou}</div></td>
+      <td class="p-shiki-cell">${shiki}</td>
+      <td class="p-form-cell">—</td>
+      <td class="p-ai-cell"><div class="p-ai-text">${ai.substring(0,300)}</div>${tegaki?`<div class="p-tegaki">${tegaki}</div>`:''}</td>
+      <td class="p-company-cell">${companiesHtml}</td>
+      <td class="p-hours-cell">${hours}</td>
+      <td class="p-sign-cell">${getSignImg(signId)}<div class="p-shokucho-name">${shokucho}</div></td>
+    </tr>`;
+  }
+
+  function buildKotsuRow({form,shokucho,signId,companiesHtml}){
+    return `<tr class="p-kotsu-row">
+      <td class="p-label-cell"><span class="p-kotsu-label">交通誘導</span></td>
+      <td class="p-koushu-cell"><div class="p-koushu">交通誘導警備業</div></td>
+      <td class="p-shiki-cell">—</td>
+      <td class="p-form-cell"><div class="p-kotsu-form">${form}</div></td>
+      <td class="p-ai-cell"></td>
+      <td class="p-company-cell">${companiesHtml}</td>
+      <td class="p-hours-cell"></td>
+      <td class="p-sign-cell">${getSignImg(signId)}<div class="p-shokucho-name">${shokucho}</div></td>
+    </tr>`;
+  }
+
+  // 監督サイン
+  function buildKantokuSigns(){
+    const kantoku=DB.kantokuMaster.filter(k=>['dairi','kanri'].includes(k.role));
+    if(!kantoku.length)return'';
+    return `<div class="p-kantoku-wrap">
+      ${kantoku.map(k=>`
+        <div class="p-kantoku-item">
+          <div class="p-kantoku-role">${ROLE_MAP[k.role]}</div>
+          <div class="p-kantoku-name">${k.name}</div>
+          ${getSignImg('kt-sign-'+k.id)}
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // 安全巡視点検表
+  function buildAnzenTable(){
+    if(!DB.anzenItems.length)return'<div style="font-size:9pt;color:#999">点検項目未登録</div>';
+    const cats=[...new Set(DB.anzenItems.map(a=>a.cat))];
+    let html='<table class="p-anzen-table"><thead><tr><th>区分</th><th>点検項目</th><th>AM</th><th>PM</th></tr></thead><tbody>';
+    cats.forEach(cat=>{
+      const items=[...DB.anzenItems.filter(a=>a.cat===cat)].sort((a,b)=>a.order-b.order);
+      items.forEach((item,i)=>{
+        const am=document.getElementById('az-am-'+item.id)?.checked;
+        const pm=document.getElementById('az-pm-'+item.id)?.checked;
+        html+=`<tr>
+          ${i===0?`<td class="p-anzen-cat" rowspan="${items.length}">${cat}</td>`:''}
+          <td class="p-anzen-item">${item.item}</td>
+          <td class="p-anzen-chk">${am?'✓':''}</td>
+          <td class="p-anzen-chk">${pm?'✓':''}</td>
+        </tr>`;
+      });
+    });
+    html+='</tbody></table>';
+    return html;
+  }
+
+  // 資材搬入
+  function buildShizaiTable(){
+    const rows=document.querySelectorAll('.rsc-row');
+    if(!rows.length)return'<div style="font-size:8pt;color:#999">搬入なし</div>';
+    let html='<table class="p-shizai-table"><thead><tr><th>名称</th><th>数量</th><th>取引先</th><th>搬入時間</th><th>備考</th></tr></thead><tbody>';
+    rows.forEach(row=>{
+      const inputs=row.querySelectorAll('input,select');
+      html+=`<tr>${[0,1,2,3,4].map(i=>`<td>${inputs[i]?.value||''}</td>`).join('')}</tr>`;
+    });
+    html+='</tbody></table>';
+    return html;
+  }
+
+  // 日付フォーマット
+  const dateObj=date?new Date(date):new Date();
+  const DOW=['日','月','火','水','木','金','土'];
+  const dateLabel=date?`令和${dateObj.getFullYear()-2018}年${dateObj.getMonth()+1}月${dateObj.getDate()}日（${DOW[dateObj.getDay()]}）`:'';
+
+  // ===== 印刷用HTML生成 =====
+  const printHTML=`<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>安全作業打合せ簿_${date}</title>
+<style>
+@page { size: A3 landscape; margin: 6mm; }
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{ font-family:'Hiragino Sans','Meiryo','Yu Gothic',sans-serif; font-size:8pt; color:#111; background:#fff; }
+
+/* ===== ヘッダー ===== */
+.p-header{ display:flex; align-items:stretch; border:1.5px solid #1e3a6e; margin-bottom:2mm; }
+.p-header-title{ background:#1e3a6e; color:#fff; padding:2mm 4mm; display:flex; flex-direction:column; justify-content:center; min-width:38mm; }
+.p-header-title .p-main-title{ font-size:12pt; font-weight:bold; letter-spacing:1px; }
+.p-header-title .p-sub-title{ font-size:7pt; margin-top:1mm; }
+.p-header-info{ display:grid; grid-template-columns:repeat(4,1fr); flex:1; }
+.p-header-cell{ border-left:1px solid #aac; padding:1mm 2mm; display:flex; flex-direction:column; justify-content:center; }
+.p-header-cell .p-cell-label{ font-size:6pt; color:#555; margin-bottom:0.5mm; }
+.p-header-cell .p-cell-value{ font-size:10pt; font-weight:bold; color:#1e3a6e; }
+.p-header-signs{ border-left:1px solid #aac; padding:1mm 2mm; display:flex; gap:3mm; align-items:center; min-width:55mm; }
+.p-hdr-sign-item{ display:flex; flex-direction:column; align-items:center; gap:0.5mm; }
+.p-hdr-sign-item .p-hdr-role{ font-size:5.5pt; color:#555; }
+.p-hdr-sign-item .p-hdr-name{ font-size:6pt; font-weight:bold; }
+.p-hdr-sign-item .p-sign-img{ width:18mm; height:10mm; object-fit:contain; border:0.5px solid #ccc; }
+.p-hdr-sign-item .p-sign-empty{ width:18mm; height:10mm; border:0.5px solid #ccc; }
+
+/* ===== メインレイアウト ===== */
+.p-body{ display:flex; gap:2mm; }
+.p-main{ flex:1; min-width:0; }
+.p-right{ width:64mm; flex-shrink:0; }
+
+/* ===== 作業表 ===== */
+.p-work-table{ width:100%; border-collapse:collapse; table-layout:fixed; }
+.p-work-table th{ background:#374151; color:#fff; font-size:7pt; padding:1.5mm 1mm; text-align:center; border:0.5px solid #aaa; }
+.p-work-table td{ border:0.5px solid #ccc; padding:1mm 1.5mm; vertical-align:top; font-size:7pt; }
+.p-label-cell{ width:9mm; background:#dbeafe; text-align:center; font-size:6.5pt; font-weight:bold; color:#1e40af; writing-mode:vertical-rl; }
+.p-koushu-cell{ width:28mm; }
+.p-koushu{ font-weight:bold; font-size:7.5pt; }
+.p-shubetsu{ font-size:6.5pt; color:#555; }
+.p-sagyou{ font-size:7pt; color:#1e40af; font-weight:bold; margin-top:0.5mm; }
+.p-shiki-cell{ width:20mm; font-size:6.5pt; }
+.p-form-cell{ width:18mm; font-size:6.5pt; }
+.p-ai-cell{ width:auto; }
+.p-ai-text{ font-size:6.5pt; line-height:1.5; color:#222; white-space:pre-wrap; }
+.p-tegaki{ font-size:6.5pt; margin-top:1mm; padding-top:1mm; border-top:0.5px dashed #aaa; color:#333; white-space:pre-wrap; }
+.p-company-cell{ width:28mm; font-size:6.5pt; }
+.p-company{ margin-bottom:0.5mm; }
+.p-ninzu{ color:#555; font-size:6pt; }
+.p-worker-role{ background:#dbeafe; color:#1e40af; font-size:5.5pt; padding:0.5px 3px; border-radius:2px; font-weight:600; margin-right:1mm; }
+.p-jisha-sep{ border-top:0.5px dashed #ccc; margin:1mm 0; }
+.p-hours-cell{ width:10mm; text-align:center; font-size:7.5pt; font-weight:bold; color:#1e40af; }
+.p-sign-cell{ width:20mm; text-align:center; }
+.p-sign-img{ width:18mm; height:11mm; object-fit:contain; }
+.p-sign-empty{ width:18mm; height:11mm; border:0.5px solid #ccc; display:inline-block; }
+.p-shokucho-name{ font-size:5.5pt; color:#555; margin-top:0.5mm; }
+.p-work-row td{ background:#fff; }
+.p-kotsu-row td{ background:#eff6ff; }
+.p-kotsu-label{ font-size:6pt; color:#1d4ed8; font-weight:bold; }
+.p-kotsu-form{ font-size:7pt; font-weight:bold; color:#1d4ed8; }
+
+/* ===== 監督サイン ===== */
+.p-kantoku-wrap{ display:flex; gap:3mm; flex-wrap:wrap; padding:1.5mm 2mm; border:0.5px solid #ccc; margin-top:1.5mm; background:#f9fafb; }
+.p-kantoku-item{ display:flex; flex-direction:column; align-items:center; gap:0.5mm; }
+.p-kantoku-role{ font-size:6pt; color:#555; }
+.p-kantoku-name{ font-size:7pt; font-weight:bold; }
+
+/* ===== 安全巡視点検表 ===== */
+.p-anzen-title{ background:#1e3a6e; color:#fff; font-size:7pt; font-weight:bold; padding:1.5mm 2mm; text-align:center; }
+.p-anzen-sub{ font-size:5.5pt; color:#ccc; }
+.p-anzen-table{ width:100%; border-collapse:collapse; }
+.p-anzen-table th{ background:#374151; color:#fff; font-size:6pt; padding:1mm; text-align:center; border:0.5px solid #aaa; }
+.p-anzen-cat{ background:#dbeafe; color:#1e40af; font-weight:bold; font-size:6pt; text-align:center; border:0.5px solid #aaa; padding:1mm; }
+.p-anzen-item{ font-size:6pt; padding:0.8mm 1mm; border:0.5px solid #ddd; line-height:1.3; }
+.p-anzen-chk{ text-align:center; font-size:9pt; font-weight:bold; color:#065f46; border:0.5px solid #ddd; width:7mm; }
+
+/* ===== 下段 ===== */
+.p-bottom{ display:flex; gap:2mm; margin-top:1.5mm; }
+.p-renraku{ width:72mm; flex-shrink:0; }
+.p-shizai{ flex:1; }
+.p-section-title{ background:#1e3a6e; color:#fff; font-size:7pt; font-weight:bold; padding:1mm 2mm; margin-bottom:1mm; }
+.p-renraku-body{ border:0.5px solid #ccc; padding:1.5mm; font-size:7pt; min-height:18mm; white-space:pre-wrap; line-height:1.6; }
+.p-shizai-table{ width:100%; border-collapse:collapse; font-size:6.5pt; }
+.p-shizai-table th{ background:#374151; color:#fff; padding:1mm; text-align:center; border:0.5px solid #aaa; }
+.p-shizai-table td{ border:0.5px solid #ddd; padding:0.8mm 1mm; }
+
+/* ===== 凡例・フッター ===== */
+.p-legend{ font-size:5.5pt; color:#666; padding:1mm 0; border-top:0.5px solid #ccc; margin-top:1mm; }
+.p-footer{ text-align:right; font-size:5.5pt; color:#999; margin-top:1mm; }
+</style>
+</head>
+<body>
+
+<!-- ヘッダー -->
+<div class="p-header">
+  <div class="p-header-title">
+    <div class="p-main-title">安全衛生日誌</div>
+    <div class="p-sub-title">工事名　${koujiName}</div>
+    <div class="p-sub-title">${dateLabel}　天候 ${tenki}　最高気温 ${kion}℃</div>
+  </div>
+  <div class="p-header-info">
+    <div class="p-header-cell">
+      <div class="p-cell-label">就労人員（当日）</div>
+      <div class="p-cell-value">${totalP} 人</div>
+    </div>
+    <div class="p-header-cell">
+      <div class="p-cell-label">就労人員（累計）</div>
+      <div class="p-cell-value">${cumP} 人</div>
+    </div>
+    <div class="p-header-cell">
+      <div class="p-cell-label">労働時間（当日）</div>
+      <div class="p-cell-value">${totalH} h</div>
+    </div>
+    <div class="p-header-cell">
+      <div class="p-cell-label">当月累計労働時間</div>
+      <div class="p-cell-value">${cumH} h</div>
+    </div>
+  </div>
+  <div class="p-header-signs">
+    ${buildKantokuSigns()}
+  </div>
+</div>
+
+<!-- メインレイアウト -->
+<div class="p-body">
+
+  <!-- 左：作業表 -->
+  <div class="p-main">
+    <table class="p-work-table">
+      <thead>
+        <tr>
+          <th style="width:9mm">区分</th>
+          <th style="width:28mm">工　種／作業内容</th>
+          <th style="width:20mm">主要資機材</th>
+          <th style="width:18mm">形　態</th>
+          <th>安全衛生指示事項</th>
+          <th style="width:28mm">会社名／名前</th>
+          <th style="width:10mm">時間</th>
+          <th style="width:20mm">職長Sign</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${buildSagyouRows()}
+      </tbody>
+    </table>
+    <!-- 下段 -->
+    <div class="p-bottom">
+      <div class="p-renraku">
+        <div class="p-section-title">連絡事項・指示事項</div>
+        <div class="p-renraku-body">${renraku}</div>
+      </div>
+      <div class="p-shizai">
+        <div class="p-section-title">資材搬入</div>
+        ${buildShizaiTable()}
+      </div>
+    </div>
+    <div class="p-legend">※資格凡例：(対)対払い機　(チ)チェーンソー　(玉)玉掛　(重)車両系建設機械　(高)高所作業車　(移)移動式クレーン　(ロ)ローラー</div>
+  </div>
+
+  <!-- 右：安全巡視点検表 -->
+  <div class="p-right">
+    <div class="p-anzen-title">安全巡視点検表<br><span class="p-anzen-sub">（レ点チェック、空欄＝該当なし）</span></div>
+    ${buildAnzenTable()}
+    <div class="p-footer">出力：${new Date().toLocaleString('ja-JP')}</div>
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  // 印刷ウィンドウを開く
+  const win=window.open('','_blank','width=1200,height=900');
+  win.document.write(printHTML);
+  win.document.close();
+  win.onload=()=>{ win.focus(); win.print(); };
+  showStatus('印刷プレビューを開きました','ok');
+}
+
+function getCompanyDataFromContainer(containerId){
+  const container=document.getElementById(containerId);if(!container)return[];
+  const rows=[];
+  container.querySelectorAll('.company-row').forEach(row=>{
+    const sel=row.querySelector('select');
+    const inp=row.querySelector('input[type=number]');
+    if(sel&&sel.value) rows.push({name:sel.value,ninzu:inp?.value||0});
+  });
+  return rows;
+}
+
+  // ===== カラー定義 =====
+  const COL_HEADER=[30,64,175]; // ブルー
+  const COL_SUB=[219,234,254];  // ライトブルー
+  const COL_GREEN=[6,95,70];
+  const COL_LIGHT_GREEN=[209,250,229];
+  const COL_GRAY=[55,65,81];
+  const COL_LIGHT_GRAY=[243,244,246];
+  const COL_AMBER=[146,64,14];
+  const COL_LIGHT_AMBER=[254,243,199];
+  const COL_RED=[153,27,27];
+
+  // ===== データ収集 =====
+  const date=document.getElementById('kouji-date').value;
+  const koujiName=document.getElementById('kouji-name').value;
+  const tenki=document.getElementById('tenki').value;
+  const kion=document.getElementById('kion').value;
+  const chiku=getChiku(date);
+  const renraku=document.getElementById('renraku').value;
+
+function renderAllMasters(){
+  renderJimuinMaster();renderCompanyMaster();renderKoushuMaster();renderShikiMaster();renderKagakuMaster();
+  renderAnzenMaster();renderAnzenCheckArea();refreshCatDatalist();
+  renderKantokuMasterTable();renderKantokuList();renderKantokuSignArea();
+  renderJunkaiMemberTable();renderJunkaiPatternRows();refreshJunkaiNameSelect();
+  renderJimuinSelects();refreshJCompanySelect();refreshAllShikiSelects();
+  refreshShokuchoSelects();
+}
+
+// ===== テーマ切り替え =====
+function toggleTheme(){
+  const isLight=document.body.classList.toggle('light-theme');
+  localStorage.setItem('theme',isLight?'light':'dark');
+  const btn=document.getElementById('theme-toggle');
+  if(btn) btn.textContent=isLight?'🌙 ダーク':'☀️ ライト';
+}
+function loadTheme(){
+  const saved=localStorage.getItem('theme');
+  if(saved==='light'){
+    document.body.classList.add('light-theme');
+    const btn=document.getElementById('theme-toggle');
+    if(btn) btn.textContent='🌙 ダーク';
+  }
+}
+
+function showStatus(msg,type){const el=document.getElementById('save-status');el.textContent=msg;el.className='show '+type;setTimeout(()=>el.className='',3000);}
+
+// ===== KY活動 =====
+let kyWorkers=[]; // 当日の作業員リスト
+
+// 打合せ簿からKYに引き継ぎ
+function syncKyFromUchiawase(){
+  const date=document.getElementById('kouji-date').value;
+  const tenki=document.getElementById('tenki').value;
+  const kion=document.getElementById('kion').value;
+  const el=document.getElementById('ky-date');if(el) el.textContent=date||'—';
+  const te=document.getElementById('ky-tenki');if(te) te.textContent=tenki||'—';
+  const ki=document.getElementById('ky-kion');if(ki) ki.textContent=kion?kion+'℃':'—';
+
+  // 作業リスト収集
+  const works=[];
+  // 作業1：道路巡回
+  const chiku=document.getElementById('s1-chiku')?.textContent||'';
+  const co=getSetting('junkai-company')||'協和建設工業㈱';
+  // 道路巡回メンバー収集
+  const s1Workers=[];
+  document.querySelectorAll('#s1-junkai-members .jk-chip').forEach(chip=>{
+    const cb=chip.querySelector('input[type=checkbox]');
+    if(cb&&cb.checked){
+      const n=chip.querySelector('span:not(.jk-role-badge)');
+      if(n&&n.textContent.trim()) s1Workers.push(n.textContent.trim());
+    }
+  });
+  works.push({label:'作業1',koushu:'道路巡回工',sagyou:chiku,workers:s1Workers});
+
+  // 作業2〜
+  sagyouIds.forEach((id,i)=>{
+    const k=getKoushuValFromBlock(id)||'';
+    const s=getShubetsuValFromBlock(id)||'';
+    const a=getSagyouValFromBlock(id)||'';
+    if(!k&&!s&&!a) return;
+    // その作業の担当作業員
+    const workers=[];
+    document.querySelectorAll(`#co-${id} .company-row`).forEach(row=>{
+      const sel=row.querySelector('select.co-sel');
+      if(!sel||!sel.value)return;
+      if(isJisha(sel.value)){
+        row.querySelectorAll('.worker-chip').forEach(chip=>{
+          const cb=chip.querySelector('input[type=checkbox]');
+          if(cb&&cb.checked){
+            const n=chip.querySelector('.chip-name');
+            if(n) workers.push(n.textContent.trim());
+          }
+        });
+      }
+    });
+    works.push({label:`作業${i+2}`,koushu:k,shubetsu:s,sagyou:a,workers});
+  });
+
+  // KYブロック描画
+  renderKySagyouBlocks(works);
+
+  // 体調チェック（全作業員）
+  kyWorkers=[...new Set(works.flatMap(w=>w.workers))];
+  renderKyMorningCheck();
+  showStatus('打合せ簿から引き継ぎました ✓','ok');
+}
+
+// 作業ごとのKYブロック描画
+function renderKySagyouBlocks(works){
+  const area=document.getElementById('ky-sagyou-blocks');if(!area)return;
+  if(!works||works.length===0){
+    area.innerHTML='<div class="card"><p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p></div>';
+    return;
+  }
+  area.innerHTML=works.map((w,i)=>`
+    <div class="card" style="border-left:3px solid var(--accent2)">
+      <div class="card-title" style="color:var(--accent2)">
+        🔰 ${w.label}　${w.koushu}${w.sagyou?'（'+w.sagyou+'）':''}
+        <button class="btn btn-ghost btn-sm ml" onclick="genKyAIBlock(${i})">✨ AI生成</button>
+      </div>
+      <!-- AI危険予知 -->
+      <div class="ai-area" style="margin-bottom:10px">
+        <div class="ai-label">AI危険予知</div>
+        <div class="ai-content" id="ky-ai-${i}">「✨ AI生成」ボタンを押してください</div>
+      </div>
+      <!-- 自分なりの危険予知 -->
+      <div style="margin-bottom:10px">
+        <label style="font-size:11px;color:var(--text2);font-weight:500">✏️ 自分なりの危険予知・対策</label>
+        <textarea id="ky-tegaki-${i}" placeholder="危険のポイントと対策を記入してください" style="margin-top:4px;min-height:64px"></textarea>
+      </div>
+      <!-- 作業員サイン -->
+      <div>
+        <div style="font-size:11px;color:var(--text2);font-weight:500;margin-bottom:6px">✍️ 作業員サイン</div>
+        <div id="ky-signs-${i}" style="display:flex;flex-wrap:wrap;gap:10px">
+          ${w.workers.length===0
+            ?'<p style="font-size:12px;color:var(--text3)">担当作業員なし</p>'
+            :w.workers.map(name=>`
+              <div class="ky-sign-item">
+                <div class="ky-sign-name">${name}</div>
+                <canvas class="sign-canvas" id="ky-sign-${i}-${name.replace(/\s/g,'_')}" width="140" height="65"></canvas>
+                <button class="btn btn-ghost btn-sm" onclick="clearCanvas('ky-sign-${i}-${name.replace(/\s/g,'_')}')">消去</button>
+              </div>`).join('')}
+        </div>
+      </div>
+    </div>`).join('');
+
+  // サインキャンバス初期化
+  works.forEach((w,i)=>{
+    w.workers.forEach(name=>{
+      setTimeout(()=>initCanvas(`ky-sign-${i}-${name.replace(/\s/g,'_')}`),100);
+    });
+  });
+
+  // worksをグローバルに保持
+  window._kyWorks=works;
+}
+
+// 作業別AI危険予知生成
+async function genKyAIBlock(blockIdx){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const el=document.getElementById('ky-ai-'+blockIdx);
+  if(!el)return;
+  el.innerHTML='<span class="ai-loading">✨ 生成中...</span>';
+  const works=window._kyWorks||[];
+  const w=works[blockIdx];if(!w)return;
+  const tenki=document.getElementById('ky-tenki')?.textContent||'';
+  const kion=document.getElementById('ky-kion')?.textContent||'';
+  const wbgt=document.getElementById('wbgt-value')?.textContent||'不明';
+  const extra=getSetting('ai-extra-prompt')||'';
+
+  const prompt=`建設現場のKY活動（危険予知活動）として、以下の作業状況を分析し、必ず以下のJSON形式のみで回答してください。他のテキストは一切含めないでください。
+
+作業:${w.koushu}${w.shubetsu?'（'+w.shubetsu+'）':''}${w.sagyou?' '+w.sagyou:''}
+天気:${tenki}　気温:${kion}　WBGT:${wbgt}
+${extra?'追加条件:'+extra:''}
+
+{"kiken":["危険のポイント1","危険のポイント2"],"risk":["リスク1","リスク2"],"taisaku":["対策1","対策2","対策3"]}`;
+
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    try{
+      const parsed=JSON.parse(text);
+      el.innerHTML=buildKyAICards(parsed);
+    }catch(e){
+      // JSONパース失敗時はテキストそのまま表示
+      el.innerHTML=text.replace(/\n/g,'<br>');
+    }
+  }catch(e){el.innerHTML='エラー: '+e.message;}
+}
+
+function buildKyAICards(d){
+  const card=(icon,title,items,bg,border,iconColor)=>`
+    <div style="background:${bg};border:1px solid ${border};border-radius:8px;padding:10px 12px;margin-bottom:8px">
+      <div style="font-size:12px;font-weight:700;color:${iconColor};margin-bottom:6px">${icon} ${title}</div>
+      <div style="font-size:12px;color:var(--text);line-height:1.7">${items.map(i=>`<div>${i}</div>`).join('')}</div>
+    </div>`;
+  let html='';
+  if(d.kiken?.length) html+=card('⊙','危険のポイント',d.kiken,'rgba(239,68,68,0.08)','rgba(239,68,68,0.25)','#dc2626');
+  if(d.risk?.length)  html+=card('♡','リスク',d.risk,'rgba(249,115,22,0.08)','rgba(249,115,22,0.25)','#ea580c');
+  if(d.taisaku?.length) html+=card('✓','対応・対策',d.taisaku.map(t=>'・'+t),'rgba(22,163,74,0.08)','rgba(22,163,74,0.25)','#16a34a');
+  return html||'データなし';
+}
+
+// 旧genKyAI（互換用）
+async function genKyAI(){ if(window._kyWorks&&window._kyWorks.length>0) genKyAIBlock(0); }
+
+// 朝の体調チェック描画
+function renderKyMorningCheck(){
+  const area=document.getElementById('ky-morning-check');if(!area)return;
+  if(kyWorkers.length===0){
+    area.innerHTML='<p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p>';return;
+  }
+  area.innerHTML=kyWorkers.map(name=>`
+    <div class="taichou-chip" id="taichou-${name.replace(/\s/g,'_')}">
+      <span style="font-size:12px;font-weight:600;min-width:60px">${name}</span>
+      <select class="taichou-sel" onchange="onTaichouChange(this,'${name.replace(/\s/g,'_')}')">
+        <option value="">未入力</option>
+        <option value="good">😊 良い</option>
+        <option value="normal">😐 普通</option>
+        <option value="bad">😞 悪い</option>
+      </select>
+    </div>`).join('');
+}
+
+function onTaichouChange(sel,key){
+  const chip=document.getElementById('taichou-'+key);if(!chip)return;
+  chip.classList.remove('taichou-ok','taichou-warn');
+  if(sel.value==='good'||sel.value==='normal') chip.classList.add('taichou-ok');
+  else if(sel.value==='bad') chip.classList.add('taichou-warn');
+}
+
+// ===== WBGT取得 =====
+// ===== WBGT・天気・気温取得 =====
+async function fetchWBGT(){
+  const statusEl=document.getElementById('wbgt-status');
+  const displayEl=document.getElementById('wbgt-display');
+  if(statusEl) statusEl.innerHTML='<span class="ai-loading">🌤 気象データ取得中...</span>';
+  if(displayEl) displayEl.style.display='none';
+
+  const gasUrl=getSetting('gas-url');
+  if(!gasUrl){
+    showManualWBGT(statusEl,'GAS URLが設定されていません');
+    return;
+  }
+
+  try{
+    const res=await fetch(gasUrl+'?action=getWeather',{method:'GET',redirect:'follow'});
+    const text=await res.text();
+    console.log('WBGT取得結果:', text); // デバッグ用
+    const data=JSON.parse(text);
+    console.log('パース結果:', data); // デバッグ用
+
+    if(data.error){
+      showManualWBGT(statusEl,data.error);
+      return;
+    }
+
+    // 気温反映
+    const kionInput=document.getElementById('kion');
+    if(kionInput) kionInput.value=data.temperature;
+    const kyKion=document.getElementById('ky-kion');
+    if(kyKion) kyKion.textContent=data.temperature+'℃';
+
+    // 天気コード変換して反映
+    const tenki=weatherCodeToText(data.weatherCode);
+    const tenkiInput=document.getElementById('tenki');
+    if(tenkiInput) tenkiInput.value=tenki;
+    const kyTenki=document.getElementById('ky-tenki');
+    if(kyTenki) kyTenki.textContent=tenki;
+
+    // 湿度チップ更新
+    const shitsuChip=document.getElementById('wbgt-shitsu-chip');
+    if(shitsuChip) shitsuChip.textContent=`湿度 ${data.humidity}%`;
+
+    // WBGT表示
+    displayWBGT(Number(data.wbgt), data.time);
+
+    if(statusEl) statusEl.innerHTML=
+      `<span style="font-size:11px;color:var(--text3)">📍 萩市　気温:${data.temperature}℃　湿度:${data.humidity}%</span>`;
+
+  }catch(e){
+    showManualWBGT(statusEl,'取得エラー: '+e.message);
+  }
+}
+
+function weatherCodeToText(code){
+  if(code===0) return '快晴';
+  if(code<=3)  return '晴れ';
+  if(code<=48) return 'くもり';
+  if(code<=67) return '雨';
+  if(code<=77) return '雪';
+  if(code<=99) return '雷雨';
+  return '不明';
+}
+
+function showManualWBGT(statusEl, msg){
+  if(!statusEl)return;
+  statusEl.innerHTML=`
+    <div style="color:var(--text2);font-size:12px;margin-bottom:6px">⚠ ${msg}</div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <label style="font-size:11px;color:var(--text2)">WBGT値を手動入力</label>
+      <input type="number" id="wbgt-manual" placeholder="26.4" step="0.1" style="width:90px;padding:4px 8px;font-size:14px;font-weight:700"
+        oninput="if(this.value)displayWBGT(parseFloat(this.value),'手動入力')">
+      <span style="font-size:12px;color:var(--text2)">℃</span>
+    </div>`;
+}
+
+function displayWBGT(val, time){
+  const displayEl=document.getElementById('wbgt-display');
+  const valueEl=document.getElementById('wbgt-value');
+  const badgeEl=document.getElementById('wbgt-level-badge');
+  const guidanceEl=document.getElementById('wbgt-guidance');
+  const markerEl=document.getElementById('wbgt-gauge-marker');
+  if(!displayEl)return;
+  displayEl.style.display='block';
+  if(valueEl) valueEl.textContent=val;
+
+  // 気温・湿度・天気チップ更新
+  const kion=document.getElementById('ky-kion')?.textContent||document.getElementById('kion')?.value||'';
+  const tenki=document.getElementById('ky-tenki')?.textContent||document.getElementById('tenki')?.value||'';
+  const kionChip=document.getElementById('wbgt-kion-chip');
+  const tenkiChip=document.getElementById('wbgt-tenki-chip');
+  if(kionChip) kionChip.textContent=`気温 ${kion}`;
+  if(tenkiChip) tenkiChip.textContent=`天気 ${tenki}`;
+
+  // ゲージマーカー位置（21〜31の範囲を0〜100%にマッピング）
+  if(markerEl){
+    const pct=Math.min(100,Math.max(0,((val-18)/16)*100));
+    markerEl.style.left=pct+'%';
+  }
+
+  // レベル判定
+  let level,bgColor,borderColor,textColor,icon,guidance;
+  if(val<21){
+    level='ほぼ安全';icon='✓';
+    bgColor='rgba(96,165,250,0.12)';borderColor='rgba(96,165,250,0.4)';textColor='#3b82f6';
+    guidance='通常の活動が可能。適切な水分補給を心がけてください。';
+  }else if(val<25){
+    level='注意';icon='⚠';
+    bgColor='rgba(134,239,172,0.15)';borderColor='rgba(22,163,74,0.3)';textColor='#16a34a';
+    guidance='積極的に水分補給をしてください。激しい運動は注意が必要です。';
+  }else if(val<28){
+    level='⚠ 警戒';icon='△';
+    bgColor='rgba(251,191,36,0.15)';borderColor='rgba(245,158,11,0.4)';textColor='#d97706';
+    guidance='30分おきに水分補給。激しい作業は中断し日陰で休憩してください。';
+  }else if(val<31){
+    level='⚠ 厳重警戒';icon='!';
+    bgColor='rgba(249,115,22,0.15)';borderColor='rgba(249,115,22,0.4)';textColor='#ea580c';
+    guidance='【厳重警戒】激しい作業は原則中止。こまめな休憩・水分補給。熱中症症状に注意。';
+  }else{
+    level='☠ 危険';icon='!!';
+    bgColor='rgba(239,68,68,0.15)';borderColor='rgba(239,68,68,0.5)';textColor='#dc2626';
+    guidance='【危険】屋外での激しい作業は中止。涼しい環境での作業のみ実施してください。';
+  }
+
+  // バッジ
+  if(badgeEl) badgeEl.innerHTML=`<span style="padding:5px 14px;border-radius:20px;border:1.5px solid ${borderColor};background:${bgColor};color:${textColor};font-size:13px;font-weight:700">${level}</span>`;
+
+  // ガイダンス
+  if(guidanceEl){
+    guidanceEl.innerHTML=`<div style="padding:8px 12px;border-radius:8px;background:${bgColor};border:1px solid ${borderColor};font-size:12px;color:${textColor};line-height:1.6">${guidance}</div>`;
+  }
+}
+
+// ===== AI危険予知生成 =====
+async function genKyAI(){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const el=document.getElementById('ky-ai-content');
+  el.innerHTML='<span class="ai-loading">✨ 生成中...</span>';
+  // 作業情報収集
+  const date=document.getElementById('ky-date').textContent||'';
+  const tenki=document.getElementById('ky-tenki').textContent||'';
+  const kion=document.getElementById('ky-kion').textContent||'';
+  const wbgt=document.getElementById('wbgt-value')?.textContent||'不明';
+  // 作業内容収集
+  const works=[];
+  works.push('道路巡回工（道路巡回）');
+  sagyouIds.forEach(id=>{
+    const k=getKoushuValFromBlock(id),s=getShubetsuValFromBlock(id),a=getSagyouValFromBlock(id);
+    if(k) works.push(`${k}（${s}）${a}`);
+  });
+  const prompt=`建設現場のKY活動（危険予知活動）として、以下の作業状況における危険ポイント・リスク・対策を3〜5項目、箇条書きで作成してください。\n\n日付:${date}\n天気:${tenki}\n気温:${kion}\nWBGT暑さ指数:${wbgt}\n本日の作業:\n${works.map((w,i)=>`${i+1}. ${w}`).join('\n')}\n\n現場作業員が理解しやすい実用的な日本語で。`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:600,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'エラーが発生しました';
+    el.innerHTML=text.replace(/\n/g,'<br>');
+  }catch(e){el.innerHTML='エラー: '+e.message;}
+}
+
+// ===== Google Form 体調チェック確認 =====
+async function fetchKyCheck(){
+  const gasUrl=getSetting('gas-url');
+  if(!gasUrl){
+    document.getElementById('ky-check-status').textContent='GAS URLを設定してください';return;
+  }
+  const date=document.getElementById('ky-date').textContent||document.getElementById('kouji-date').value||'';
+  document.getElementById('ky-check-status').innerHTML='<span class="ai-loading">🔄 データ取得中...</span>';
+  try{
+    const res=await fetch(`${gasUrl}?action=getKyCheck&date=${date}`,{method:'GET',redirect:'follow'});
+    const text=await res.text();
+    const data=JSON.parse(text);
+    if(data.error){document.getElementById('ky-check-status').textContent='エラー: '+data.error;return;}
+    renderKyCheckTable(data.checks||[]);
+    document.getElementById('ky-check-status').textContent=`最終更新: ${new Date().toLocaleTimeString('ja-JP')}`;
+  }catch(e){
+    document.getElementById('ky-check-status').textContent='取得エラー: '+e.message;
+  }
+}
+
+function renderKyCheckTable(checks){
+  const area=document.getElementById('ky-check-table');if(!area)return;
+  const times=['10:00','12:00','15:00','終業'];
+  const workers=kyWorkers.length>0?kyWorkers:DB.jimuin.filter(j=>!['dairi','kanri','anzen'].includes(j.role)&&getEffectiveUkeoi(j)!=='kotsu').map(j=>j.name);
+  if(workers.length===0){area.innerHTML='<p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎ後に確認してください</p>';return;}
+  let html=`<table class="ky-table"><thead><tr><th>氏名</th>${times.map(t=>`<th>${t}</th>`).join('')}</tr></thead><tbody>`;
+  workers.forEach(name=>{
+    html+=`<tr><td style="text-align:left;font-weight:500;padding:5px 8px">${name}</td>`;
+    times.forEach(t=>{
+      const rec=checks.find(c=>c.name===name&&c.time===t);
+      if(rec){
+        const cls=rec.status==='悪い'?'ky-ng':'ky-ok';
+        const emoji=rec.status==='良い'?'😊':rec.status==='普通'?'😐':'😞';
+        html+=`<td class="${cls}">${emoji} ${rec.status}</td>`;
+      }else{
+        html+=`<td class="ky-none">未入力</td>`;
+      }
+    });
+    html+='</tr>';
+  });
+  html+='</tbody></table>';
+  area.innerHTML=html;
+}
+
+// QRコード表示（簡易版）
+function showKyQR(){
+  const url=document.getElementById('ky-form-url')?.value;
+  if(!url){alert('Google Form URLを入力してください');return;}
+  const wrap=document.getElementById('ky-qr-wrap');
+  if(wrap) wrap.style.display='block';
+  // QRコードはQRコードライブラリが必要なためURLをテキスト表示
+  const canvas=document.getElementById('ky-qr-canvas');
+  if(canvas){
+    const ctx=canvas.getContext('2d');
+    ctx.fillStyle='#fff';ctx.fillRect(0,0,120,120);
+    ctx.fillStyle='#1a1f2e';ctx.font='8px monospace';
+    ctx.fillText('QR: '+url.substring(0,20),4,20);
+    ctx.fillText('（URLをコピーして',4,40);
+    ctx.fillText('QRコード生成サービス',4,55);
+    ctx.fillText('でQRを作成してください）',4,70);
+  }
+}
+
+// KY活動保存
+function saveKy(){
+  const date=document.getElementById('ky-date').textContent;
+  if(!date||date==='—'){showStatus('打合せ簿から引き継ぎしてください','err');return;}
+  // 朝の体調チェックデータ収集
+  const morningChecks={};
+  kyWorkers.forEach(name=>{
+    const key=name.replace(/\s/g,'_');
+    const sel=document.querySelector(`#taichou-${key} select`);
+    morningChecks[name]=sel?.value||'';
+  });
+  // localStorage保存
+  const kyData={date,morningChecks,kyWorkers,savedAt:new Date().toISOString()};
+  const existing=DB.history.find(h=>h.date===date);
+  if(existing) existing.kyData=kyData;
+  saveDB();
+  showStatus('KY活動を保存しました ✓','ok');
+}
+function clearAll(){DB={jimuin:[],companies:[],koushu:[],shiki:[],settings:{},history:[]};saveDB();location.reload();}
+
+// 年度取得（4月始まり）: "2026-06" → "2026", "2027-01" → "2026"
+function getNendo(dateStr){
+  if(!dateStr)return'';
+  const d=new Date(dateStr);
+  const y=d.getFullYear(), m=d.getMonth()+1;
+  return String(m>=4?y:y-1);
+}
+
+function updateJunkaiCompanyDisplay(){
+  const co=getSetting('junkai-company')||'協和建設工業㈱';
+  const el=document.getElementById('s1-junkai-company');
+  if(el) el.textContent=co;
+  const el2=document.getElementById('s1-fixed-company');
+  if(el2) el2.textContent=co;
+}
+
+function loadSettings(){
+  const s=DB.settings;
+  const set=(id,val)=>{const el=document.getElementById(id);if(el&&val) el.value=val;};
+  set('gas-url',         s['gas-url']);
+  set('junkai-company',  s['junkai-company']);
+  set('kouji-start',     s['kouji-start']);
+  set('cum-people',      s['cum-people']);
+  set('cum-hours-manual',s['cum-hours-manual']);
+  set('bulk-hours',      s['bulk-hours']);
+  set('ai-item-count',   s['ai-item-count']||'5');
+  set('ai-style',        s['ai-style']||'normal');
+  set('ai-extra-prompt', s['ai-extra-prompt']||'');
+  const key=localStorage.getItem('gemini_key');
+  const apiEl=document.getElementById('api-key');if(apiEl&&key) apiEl.value=key;
+  updateAIPromptPreview();
+}
+
+function updateMonthHistoryInfo(){
+  const today=new Date().toISOString().split('T')[0];
+  const nendo=getNendo(today);
+  const nendoRecs=DB.history.filter(h=>h.date&&getNendo(h.date)===nendo);
+  const nendoH=nendoRecs.reduce((sum,h)=>sum+(parseFloat(h.totalH)||0),0);
+  const el1=document.getElementById('month-history-count');
+  const el2=document.getElementById('month-history-hours');
+  if(el1) el1.textContent=nendoRecs.length;
+  if(el2) el2.textContent=nendoH.toFixed(1);
+}
+
+function init(){
+  loadDB();loadSettings();
+  loadTheme();
+  updateJunkaiCompanyDisplay();
+  const today=new Date().toISOString().split('T')[0];
+  document.getElementById('kouji-date').value=today;
+  document.getElementById('kouji-date').addEventListener('change',updateChiku);
+  // 確実にDOM描画後に実行
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ updateChiku(); }); });
+  renderJimuinMaster();renderCompanyMaster();renderKoushuMaster();renderShikiMaster();renderKagakuMaster();
+  refreshKoushuDatalist();
+  refreshAllShikiSelects();
+  renderAnzenMaster();renderAnzenCheckArea();refreshCatDatalist();
+  renderKantokuMasterTable();
+  renderJunkaiMemberTable();
+  renderJunkaiPatternRows();
+  refreshJunkaiNameSelect();
+  renderJimuinSelects();refreshJCompanySelect();refreshAllShikiSelects();
+  refreshShokuchoSelects();renderKantokuSignArea();
+  // 作業1の職長セレクト初期化
+  const s1sc=document.getElementById('s1-shokucho');
+  if(s1sc){s1sc.className='shokucho-sel';}
+  // サインCanvas初期化
+  setTimeout(()=>{initCanvas('s1-sign');initAllCanvases();},100);
+  calcTotals();
+  updateMonthHistoryInfo();
+  // GAS URLが設定済みなら起動時にマスタ自動取得
+  if(getSetting('gas-url')){
+    loadMasterFromGAS().then(ok=>{
+      if(ok) renderAllMasters();
+    });
+  }
+}
+init();
+</script>
+</body>
+</html>
