@@ -451,8 +451,8 @@ textarea{resize:vertical;min-height:56px;}
 
   <!-- WBGT -->
   <div class="card">
-    <div class="card-title">🌡️ 暑さ指数（WBGT）本日予測最高
-      <button class="btn btn-blue btn-sm ml" onclick="fetchWBGT()">📡 気象データ取得</button>
+    <div class="card-title">🌡️ 暑さ指数（WBGT）
+      <button class="btn btn-blue btn-sm ml" onclick="fetchWBGT()">📡 環境省データ取得</button>
     </div>
     <div id="wbgt-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
     <div id="wbgt-display" style="display:none">
@@ -3451,11 +3451,11 @@ async function fetchWBGT(){
       return;
     }
 
-    // 気温（予測最高）を打合せ簿に反映
+    // 気温反映
     const kionInput=document.getElementById('kion');
     if(kionInput) kionInput.value=data.temperature;
     const kyKion=document.getElementById('ky-kion');
-    if(kyKion) kyKion.textContent=data.temperature+'℃（予測最高）';
+    if(kyKion) kyKion.textContent=data.temperature+'℃';
 
     // 天気コード変換して反映
     const tenki=weatherCodeToText(data.weatherCode);
@@ -3466,17 +3466,13 @@ async function fetchWBGT(){
 
     // 湿度チップ更新
     const shitsuChip=document.getElementById('wbgt-shitsu-chip');
-    if(shitsuChip) shitsuChip.textContent=`湿度 ${data.humidity}%（予測最高）`;
+    if(shitsuChip) shitsuChip.textContent=`湿度 ${data.humidity}%`;
 
-    // 予測最高WBGT表示
-    displayWBGT(Number(data.wbgt), '本日予測最高');
+    // WBGT表示
+    displayWBGT(Number(data.wbgt), data.time);
 
-    // 現在値も小さく表示
-    if(statusEl) statusEl.innerHTML=`
-      <span style="font-size:11px;color:var(--text3)">
-        📍 萩市　本日予測最高気温:${data.temperature}℃　湿度:${data.humidity}%
-        　現在:${data.temperatureNow}℃ / WBGT ${data.wbgtNow}
-      </span>`;
+    if(statusEl) statusEl.innerHTML=
+      `<span style="font-size:11px;color:var(--text3)">📍 萩市　気温:${data.temperature}℃　湿度:${data.humidity}%</span>`;
 
   }catch(e){
     showManualWBGT(statusEl,'取得エラー: '+e.message);
