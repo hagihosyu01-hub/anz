@@ -181,6 +181,12 @@ textarea{resize:vertical;min-height:56px;}
 .wbgt-badge{padding:6px 16px;border-radius:20px;font-size:14px;font-weight:700;letter-spacing:1px;}
 
 /* KYサインエリア */
+/* KY活動内タブ */
+.ky-tab-btn{padding:8px 16px;border:none;background:none;color:var(--text2);font-size:12px;cursor:pointer;white-space:nowrap;border-bottom:3px solid transparent;transition:all 0.2s;font-family:inherit;}
+.ky-tab-btn.active{color:var(--accent2);border-bottom-color:var(--accent2);background:rgba(16,185,129,0.06);}
+.ky-tab-btn:hover:not(.active){color:var(--text);background:rgba(255,255,255,0.04);}
+.ky-tab-content{display:none;}
+.ky-tab-content.active{display:block;}
 .ky-sign-item{display:flex;flex-direction:column;align-items:center;gap:4px;}
 .ky-sign-name{font-size:12px;font-weight:600;color:var(--text);}
 
@@ -320,12 +326,19 @@ textarea{resize:vertical;min-height:56px;}
       <div class="fg w2"><label>工事名</label><input type="text" id="kouji-name" value="萩保守工事"></div>
       <div class="fg w-quarter"><label>日付</label><input type="date" id="kouji-date" onchange="updateChiku()"></div>
       <div class="fg w-quarter"><label>天気</label>
-        <select id="tenki"><option>晴れ</option><option>曇り</option><option>雨</option><option>曇り時々晴れ</option><option>曇り時々雨</option><option>晴れ時々曇り</option></select>
+        <select id="tenki"><option>快晴</option><option>晴れ</option><option>晴れ時々曇り</option><option>曇り時々晴れ</option><option>曇り</option><option>曇り時々雨</option><option>雨</option><option>雪</option><option>雷雨</option></select>
       </div>
-      <div class="fg w-quarter"><label>気温 (℃)</label><input type="number" id="kion" placeholder="25"></div>
+      <div class="fg w-quarter"><label>予想最高気温 (℃)</label><input type="number" id="kion" placeholder="34"></div>
+      <div class="fg w-quarter"><label>予想最低気温 (℃)</label><input type="number" id="kion-min" placeholder="18"></div>
     </div>
     <div class="form-row">
-      <div class="fg w-full"><label>📢 連絡事項</label><textarea id="renraku" placeholder="本日の連絡事項を入力してください"></textarea></div>
+      <div class="fg w-full">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <label>📢 連絡事項</label>
+          <button class="btn btn-ghost btn-sm" onclick="addHeatAIToRenraku()" style="font-size:11px">🌡️ 熱中症AI指示を追記</button>
+        </div>
+        <textarea id="renraku" placeholder="本日の連絡事項を入力してください"></textarea>
+      </div>
     </div>
   </div>
 
@@ -433,7 +446,7 @@ textarea{resize:vertical;min-height:56px;}
 <!-- ===== KY活動 ===== -->
 <div id="sec-ky" class="section">
 
-  <!-- 基本情報 -->
+  <!-- ヘッダー -->
   <div class="card">
     <div class="card-title">
       🔰 KY活動
@@ -445,81 +458,103 @@ textarea{resize:vertical;min-height:56px;}
     <div class="form-row">
       <div class="fg w-quarter"><label>日付</label><div id="ky-date" style="padding:6px 0;font-size:13px;font-weight:600;color:var(--text2)">—</div></div>
       <div class="fg w-quarter"><label>天気</label><div id="ky-tenki" style="padding:6px 0;font-size:13px">—</div></div>
-      <div class="fg w-quarter"><label>気温</label><div id="ky-kion" style="padding:6px 0;font-size:13px">—</div></div>
+      <div class="fg w-quarter"><label>最高気温</label><div id="ky-kion" style="padding:6px 0;font-size:13px">—</div></div>
+      <div class="fg w-quarter"><label>最低気温</label><div id="ky-kion-min" style="padding:6px 0;font-size:13px">—</div></div>
     </div>
   </div>
 
-  <!-- WBGT -->
-  <div class="card">
-    <div class="card-title">🌡️ 暑さ指数（WBGT）
-      <button class="btn btn-blue btn-sm ml" onclick="fetchWBGT()">📡 環境省データ取得</button>
+  <!-- KY内タブ -->
+  <div id="ky-tabs" style="background:var(--bg2);border-radius:8px;overflow:hidden;margin-bottom:10px">
+    <div style="display:flex;overflow-x:auto;border-bottom:1px solid var(--border)">
+      <button class="ky-tab-btn active" onclick="showKyTab('ky-all',this)">🌡️ 全体・熱中症</button>
+      <button class="ky-tab-btn" onclick="showKyTab('ky-works',this)">🔨 作業KY</button>
+      <button class="ky-tab-btn" onclick="showKyTab('ky-taichou',this)">💊 体調チェック</button>
     </div>
-    <div id="wbgt-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
-    <div id="wbgt-display" style="display:none">
-      <!-- WBGT数値と警戒レベル -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="display:flex;align-items:baseline;gap:6px">
-          <span style="font-size:13px;color:var(--text2)">WBGT 指数</span>
-          <span id="wbgt-value" style="font-size:36px;font-weight:700;color:var(--text)">—</span>
+
+    <!-- 全体・熱中症タブ -->
+    <div id="ky-all" class="ky-tab-content active" style="padding:10px">
+      <!-- WBGT -->
+      <div class="card">
+        <div class="card-title">🌡️ 暑さ指数（WBGT）本日予測最高
+          <button class="btn btn-blue btn-sm ml" onclick="fetchWBGT()">📡 気象データ取得</button>
         </div>
-        <div id="wbgt-level-badge"></div>
-      </div>
-      <!-- ゲージバー -->
-      <div style="margin-bottom:10px">
-        <div style="position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,#60a5fa 0%,#86efac 25%,#fbbf24 50%,#f97316 75%,#ef4444 100%);margin-bottom:4px">
-          <div id="wbgt-gauge-marker" style="position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #374151;transform:translateX(-50%);transition:left 0.5s;left:0%"></div>
+        <div id="wbgt-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+        <div id="wbgt-display" style="display:none">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+            <div style="display:flex;align-items:baseline;gap:6px">
+              <span style="font-size:13px;color:var(--text2)">WBGT 指数</span>
+              <span id="wbgt-value" style="font-size:36px;font-weight:700;color:var(--text)">—</span>
+            </div>
+            <div id="wbgt-level-badge"></div>
+          </div>
+          <div style="margin-bottom:10px">
+            <div style="position:relative;height:8px;border-radius:4px;background:linear-gradient(to right,#60a5fa 0%,#86efac 25%,#fbbf24 50%,#f97316 75%,#ef4444 100%);margin-bottom:4px">
+              <div id="wbgt-gauge-marker" style="position:absolute;top:-3px;width:14px;height:14px;border-radius:50%;background:#fff;border:2px solid #374151;transform:translateX(-50%);transition:left 0.5s;left:0%"></div>
+            </div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
+              <span>安全〜21</span><span>注意 21〜25</span><span>警戒 25〜28</span><span>危険 28〜</span>
+            </div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
+            <span id="wbgt-kion-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">最高気温 —℃</span>
+            <span id="wbgt-shitsu-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">湿度 —%</span>
+            <span id="wbgt-tenki-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">天気 —</span>
+          </div>
+          <div id="wbgt-guidance"></div>
         </div>
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--text3)">
-          <span>安全〜21</span>
-          <span>注意 21〜25</span>
-          <span>警戒 25〜28</span>
-          <span>危険 28〜</span>
+      </div>
+      <!-- 熱中症AI危険予知 -->
+      <div class="card">
+        <div class="card-title">🤖 熱中症AI危険予知
+          <button class="btn btn-ghost btn-sm ml" onclick="genHeatKyAI()">✨ AI生成</button>
+        </div>
+        <div class="ai-area">
+          <div class="ai-label">熱中症リスク・危険ポイント・対策</div>
+          <div class="ai-content" id="ky-heat-ai">「✨ AI生成」ボタンを押してください</div>
         </div>
       </div>
-      <!-- 気温・湿度・天気チップ -->
-      <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px">
-        <span id="wbgt-kion-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">気温 —℃</span>
-        <span id="wbgt-shitsu-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">湿度 —%</span>
-        <span id="wbgt-tenki-chip" style="padding:4px 12px;background:var(--bg3);border:1px solid var(--border);border-radius:20px;font-size:12px;color:var(--text)">天気 —</span>
+    </div>
+
+    <!-- 作業KYタブ -->
+    <div id="ky-works" class="ky-tab-content" style="padding:10px;display:none">
+      <div id="ky-sagyou-blocks">
+        <p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p>
       </div>
-      <!-- 対策ガイダンス -->
-      <div id="wbgt-guidance"></div>
     </div>
-  </div>
 
-  <!-- 作業ごとのKYブロック -->
-  <div id="ky-sagyou-blocks"></div>
-
-  <!-- 朝の体調チェック -->
-  <div class="card">
-    <div class="card-title">💊 朝の体調チェック</div>
-    <p style="font-size:11px;color:var(--text2);margin-bottom:10px">iPadで全員の体調を確認・入力してください</p>
-    <div id="ky-morning-check" style="display:flex;flex-wrap:wrap;gap:8px">
-      <p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p>
-    </div>
-  </div>
-
-  <!-- 時間帯別体調チェック確認 -->
-  <div class="card">
-    <div class="card-title">📱 時間帯別体調チェック（Google Form）
-      <button class="btn btn-ghost btn-sm ml" onclick="fetchKyCheck()">🔄 更新</button>
-    </div>
-    <p style="font-size:11px;color:var(--text2);margin-bottom:8px">作業員が各自スマホでQRコードから入力します。未入力は赤で表示されます。</p>
-    <div style="margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
-      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📲 Google Form URL</div>
-      <input type="text" id="ky-form-url" placeholder="https://forms.google.com/..." style="font-size:11px"
-        oninput="saveSetting('ky-form-url',this.value)">
-      <div id="ky-qr-wrap" style="margin-top:8px;display:none">
-        <canvas id="ky-qr-canvas" width="120" height="120"></canvas>
-        <p style="font-size:10px;color:var(--text3);margin-top:4px">このQRコードをPDFに印刷して現場に貼ってください</p>
+    <!-- 体調チェックタブ -->
+    <div id="ky-taichou" class="ky-tab-content" style="padding:10px;display:none">
+      <!-- 朝の体調チェック -->
+      <div class="card">
+        <div class="card-title">💊 朝の体調チェック</div>
+        <p style="font-size:11px;color:var(--text2);margin-bottom:10px">iPadで全員の体調を確認・入力してください</p>
+        <div id="ky-morning-check" style="display:flex;flex-wrap:wrap;gap:8px">
+          <p style="font-size:12px;color:var(--text3)">打合せ簿から引き継ぎボタンを押してください</p>
+        </div>
       </div>
-      <button class="btn btn-ghost btn-sm" onclick="showKyQR()" style="margin-top:6px">QRコード表示</button>
+      <!-- 時間帯別体調チェック -->
+      <div class="card">
+        <div class="card-title">📱 時間帯別体調チェック（Google Form）
+          <button class="btn btn-ghost btn-sm ml" onclick="fetchKyCheck()">🔄 更新</button>
+        </div>
+        <p style="font-size:11px;color:var(--text2);margin-bottom:8px">作業員が各自スマホでQRコードから入力します。未入力は赤で表示されます。</p>
+        <div style="margin-bottom:12px;padding:10px;background:var(--bg3);border-radius:6px;border:1px solid var(--border)">
+          <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:6px">📲 Google Form URL</div>
+          <input type="text" id="ky-form-url" placeholder="https://forms.google.com/..." style="font-size:11px"
+            oninput="saveSetting('ky-form-url',this.value)">
+          <button class="btn btn-ghost btn-sm" onclick="showKyQR()" style="margin-top:6px">QRコード表示</button>
+          <div id="ky-qr-wrap" style="margin-top:8px;display:none">
+            <canvas id="ky-qr-canvas" width="120" height="120"></canvas>
+          </div>
+        </div>
+        <div id="ky-check-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
+        <div id="ky-check-table"></div>
+      </div>
     </div>
-    <div id="ky-check-status" style="font-size:12px;color:var(--text2);margin-bottom:8px"></div>
-    <div id="ky-check-table"></div>
-  </div>
 
+  </div>
 </div>
+
 
 <!-- ===== 人員マスタ ===== -->
 <div id="sec-master-jimuin" class="section">
@@ -2626,10 +2661,12 @@ async function genAI(blockId){
   const tenki=document.getElementById('tenki').value,kion=document.getElementById('kion').value;
   const date=document.getElementById('kouji-date').value;
   const inst=buildAIInstruction();
+  // 各作業AIは熱中症対策を除く（連絡事項に別途記載）
+  const noHeat='熱中症対策・暑さ対策は除いてください（別途連絡事項に記載）。';
   let prompt='';
   if(blockId==='s1'){
     const ch=getChiku(date),shiki=document.getElementById('s1-shiki')?.value||'';
-    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n工種:道路巡回工\n種別:道路巡回\n作業内容:${ch}\n資機材:${shiki}\n天気:${tenki}\n気温:${kion}℃`;
+    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n${noHeat}\n工種:道路巡回工\n種別:道路巡回\n作業内容:${ch}\n資機材:${shiki}\n天気:${tenki}\n気温:${kion}℃`;
   }else if(blockId==='s1-kotsu'){
     const form=document.getElementById('s1-kotsu-form')?.value||'';
     prompt=`交通誘導作業（${form}）の安全指示事項を${inst}\n天気:${tenki}`;
@@ -2642,7 +2679,7 @@ async function genAI(blockId){
     const s=getShubetsuValFromBlock(blockId);
     const a=getSagyouValFromBlock(blockId);
     const sk=document.getElementById('sk-inp-'+blockId)?.value||'';
-    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n工種:${k}\n種別:${s}\n作業内容:${a}\n資機材:${sk}\n天気:${tenki}\n気温:${kion}℃`;
+    prompt=`建設工事安全管理担当として、以下の作業の安全指示事項を${inst}\n${noHeat}\n工種:${k}\n種別:${s}\n作業内容:${a}\n資機材:${sk}\n天気:${tenki}\n気温:${kion}℃`;
   }
   const el=document.getElementById(blockId+'-ai');
   if(!el)return;
@@ -3232,10 +3269,72 @@ function loadTheme(){
   }
 }
 
+// 熱中症AI安全指示を連絡事項に追記
+async function addHeatAIToRenraku(){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const kion=document.getElementById('kion').value||'—';
+  const kionMin=document.getElementById('kion-min')?.value||'—';
+  const tenki=document.getElementById('tenki').value||'—';
+  const wbgtVal=document.getElementById('wbgt-value')?.textContent||'不明';
+  const btn=event.target;
+  btn.textContent='生成中...';btn.disabled=true;
+  const prompt=`建設現場の熱中症予防安全指示を3項目、簡潔な箇条書きで作成してください。\n予想最高気温:${kion}℃　予想最低気温:${kionMin}℃　天気:${tenki}　WBGT予測最高:${wbgtVal}\n各項目は1〜2文で。「熱中症注意」「WBGT${wbgtVal}」を冒頭に含める。日本語で。`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
+    const renraku=document.getElementById('renraku');
+    if(renraku){
+      const existing=renraku.value;
+      const sep=existing?'\n\n---熱中症注意---\n':'---熱中症注意---\n';
+      renraku.value=existing+sep+text.trim();
+    }
+  }catch(e){alert('エラー: '+e.message);}
+  btn.textContent='🌡️ 熱中症AI指示を追記';btn.disabled=false;
+}
+
 function showStatus(msg,type){const el=document.getElementById('save-status');el.textContent=msg;el.className='show '+type;setTimeout(()=>el.className='',3000);}
 
 // ===== KY活動 =====
 let kyWorkers=[]; // 当日の作業員リスト
+
+// KY内タブ切り替え
+function showKyTab(name,btn){
+  document.querySelectorAll('.ky-tab-content').forEach(el=>{el.style.display='none';el.classList.remove('active');});
+  document.querySelectorAll('.ky-tab-btn').forEach(b=>b.classList.remove('active'));
+  const el=document.getElementById(name);
+  if(el){el.style.display='block';el.classList.add('active');}
+  btn.classList.add('active');
+}
+
+// 熱中症AI危険予知（全体タブ用）
+async function genHeatKyAI(){
+  const apiKey=localStorage.getItem('gemini_key')||document.getElementById('api-key').value;
+  if(!apiKey){alert('Gemini APIキーを入力してください');return;}
+  const el=document.getElementById('ky-heat-ai');
+  if(!el)return;
+  el.innerHTML='<span class="ai-loading">✨ 生成中...</span>';
+  const kion=document.getElementById('ky-kion')?.textContent||document.getElementById('kion')?.value||'—';
+  const kionMin=document.getElementById('ky-kion-min')?.textContent||document.getElementById('kion-min')?.value||'—';
+  const tenki=document.getElementById('ky-tenki')?.textContent||document.getElementById('tenki')?.value||'—';
+  const wbgt=document.getElementById('wbgt-value')?.textContent||'不明';
+  const extra=getSetting('ai-extra-prompt')||'';
+  const prompt=`建設現場のKY活動として、熱中症に特化した危険予知を作成してください。必ず以下のJSON形式のみで回答してください。\n\n予想最高気温:${kion}　予想最低気温:${kionMin}　天気:${tenki}　WBGT予測最高:${wbgt}\n${extra?'追加条件:'+extra:''}\n\n{"kiken":["危険のポイント1","危険のポイント2"],"risk":["リスク1","リスク2"],"taisaku":["対策1","対策2","対策3"]}`;
+  try{
+    const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent?key=${apiKey}`,{
+      method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:500,temperature:0.7}})
+    });
+    const data=await res.json();
+    const text=(data.candidates?.[0]?.content?.parts?.[0]?.text||'').replace(/```json|```/g,'').trim();
+    try{el.innerHTML=buildKyAICards(JSON.parse(text));}
+    catch(e){el.innerHTML=text.replace(/\n/g,'<br>');}
+  }catch(e){el.innerHTML='エラー: '+e.message;}
+}
 
 // 打合せ簿からKYに引き継ぎ
 function syncKyFromUchiawase(){
@@ -3245,6 +3344,8 @@ function syncKyFromUchiawase(){
   const el=document.getElementById('ky-date');if(el) el.textContent=date||'—';
   const te=document.getElementById('ky-tenki');if(te) te.textContent=tenki||'—';
   const ki=document.getElementById('ky-kion');if(ki) ki.textContent=kion?kion+'℃':'—';
+  const kionMin=document.getElementById('kion-min')?.value||'';
+  const kiMin=document.getElementById('ky-kion-min');if(kiMin) kiMin.textContent=kionMin?kionMin+'℃':'—';
 
   // 作業リスト収集
   const works=[];
@@ -3451,11 +3552,15 @@ async function fetchWBGT(){
       return;
     }
 
-    // 気温反映
+    // 最高気温・最低気温を打合せ簿に反映
     const kionInput=document.getElementById('kion');
     if(kionInput) kionInput.value=data.temperature;
+    const kionMinInput=document.getElementById('kion-min');
+    if(kionMinInput) kionMinInput.value=data.temperatureMin;
     const kyKion=document.getElementById('ky-kion');
-    if(kyKion) kyKion.textContent=data.temperature+'℃';
+    if(kyKion) kyKion.textContent=data.temperature+'℃（予測最高）';
+    const kyKionMin=document.getElementById('ky-kion-min');
+    if(kyKionMin) kyKionMin.textContent=(data.temperatureMin||'—')+'℃（予測最低）';
 
     // 天気コード変換して反映
     const tenki=weatherCodeToText(data.weatherCode);
@@ -3466,13 +3571,17 @@ async function fetchWBGT(){
 
     // 湿度チップ更新
     const shitsuChip=document.getElementById('wbgt-shitsu-chip');
-    if(shitsuChip) shitsuChip.textContent=`湿度 ${data.humidity}%`;
+    if(shitsuChip) shitsuChip.textContent=`湿度 ${data.humidity}%（予測最高）`;
 
-    // WBGT表示
-    displayWBGT(Number(data.wbgt), data.time);
+    // 予測最高WBGT表示
+    displayWBGT(Number(data.wbgt), '本日予測最高');
 
-    if(statusEl) statusEl.innerHTML=
-      `<span style="font-size:11px;color:var(--text3)">📍 萩市　気温:${data.temperature}℃　湿度:${data.humidity}%</span>`;
+    // 現在値も小さく表示
+    if(statusEl) statusEl.innerHTML=`
+      <span style="font-size:11px;color:var(--text3)">
+        📍 萩市　本日予測最高気温:${data.temperature}℃　湿度:${data.humidity}%
+        　現在:${data.temperatureNow}℃ / WBGT ${data.wbgtNow}
+      </span>`;
 
   }catch(e){
     showManualWBGT(statusEl,'取得エラー: '+e.message);
